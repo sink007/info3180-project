@@ -5,17 +5,26 @@ import AppFooter from "@/components/AppFooter.vue";
 </script>
 
 <template>
-  <AppHeader />
+  <div class="layout-wrapper">
+    <AppHeader />
 
-  <main>
-    <RouterView />
-  </main>
-  
-  <AppFooter />
+    <main class="content-area">
+      <RouterView />
+    </main>
+    
+    <AppFooter />
+  </div>
 </template>
 
 <style>
-body {
-  padding-top: 75px;
+.layout-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content-area {
+  flex: 1;
+  margin-top: 75px;
 }
 </style>

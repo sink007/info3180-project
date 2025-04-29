@@ -1,37 +1,17 @@
 <template>
   <header>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="/">VueJS with Flask</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <RouterLink to="/" class="nav-link">Home</RouterLink>
-            </li>
-            <li class="nav-item">
-              <RouterLink class="nav-link" to="/about">About</RouterLink>
-            </li>
-            <li class="nav-item" v-if="!isLoggedIn">
-              <RouterLink class="nav-link" to="/register">Register</RouterLink>
-            </li>
-            <li class="nav-item" v-if="!isLoggedIn">
-              <RouterLink class="nav-link" to="/login">Login</RouterLink>
-            </li>
-            <li class="nav-item" v-if="isLoggedIn">
-              <button class="nav-link btn btn-link text-white" @click="logoutUser">Logout</button>
-            </li>
-          </ul>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <nav class="navbar">
+      <div class="container-fluid d-flex justify-content-between align-items-center w-100">
+        
+        <!-- Left: Jam Date logo -->
+        <a class="navbar-brand handwritten" href="/">Jam Date</a>
+
+        <!-- Right: Show Report + Logout if logged in -->
+        <div class="d-flex align-items-center gap-3">
+          <RouterLink v-if="isLoggedIn" to="/my-profile" class="nav-link">My Profile</RouterLink>
+          <RouterLink to="/report" class="nav-link report-link">View Report</RouterLink>
+          <button v-if="isLoggedIn" class="btn btn-link logout-btn" @click="logoutUser">Logout</button>
         </div>
       </div>
     </nav>
@@ -42,16 +22,13 @@
 import { RouterLink, useRouter } from "vue-router";
 import { ref, onMounted } from "vue";
 
-// Global login state (you might want to use a proper store like Pinia for larger apps)
 const isLoggedIn = ref(false);
 const router = useRouter();
 
-// Check if user is logged in on mount (basic check)
 onMounted(() => {
   isLoggedIn.value = sessionStorage.getItem("loggedIn") === "true";
 });
 
-// Handle logout
 const logoutUser = async () => {
   try {
     const response = await fetch("/api/auth/logout", {
@@ -72,9 +49,48 @@ const logoutUser = async () => {
 </script>
 
 <style scoped>
-.navbar .btn-link {
-  padding: 0;
+.navbar {
+  background-color: #111827; /* solid dark navy (tailwind vibes) */
+  color: white;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  padding: 12px 40px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-brand {
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: white;
+  text-decoration: none;
+}
+
+.handwritten {
+  font-family: 'Pacifico', cursive;
+}
+
+.nav-link {
+  color: white;
+  font-weight: 500;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.2s ease;
+}
+
+.report-link:hover {
+  color: #00ffc8;
+  text-decoration: underline;
+}
+
+.logout-btn {
+  background: none;
   border: none;
+  color: #ddd;
+  font-weight: 500;
   cursor: pointer;
+  text-decoration: underline;
+  font-size: 0.95rem;
 }
 </style>

@@ -15,6 +15,8 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 from flask_wtf.csrf import generate_csrf
 from werkzeug.security import check_password_hash
+from flask_wtf import csrf
+from app import csrf
 ###
 
 ###
@@ -85,35 +87,41 @@ def login():
         else:
             return jsonify({"message": "Invalid credentials"}), 401
 
-@app.route('/api/auth/logout') #undone
+@csrf.exempt
+@app.route('/api/auth/logout', methods=['POST'])
 def logout():
-    logout_user()
-    return jsonify({
-        "message": "Logout successful"
-    }), 200
+    return jsonify({"message": "Logged out successfully."}), 200
 
 @app.route('/api/profiles', methods=['GET', 'POST'])
 @login_required
 def profiles():
     if request.method == 'GET':
-        profiles = Profile.query.all()
-        return jsonify([{
-            "id": p.id,
-            "user_id": p.user_id_fk,
-            "description": p.description,
-            "parish": p.parish,
-            "biography": p.biography,
-            "sex": p.sex,
-            "race": p.race,
-            "birth_year": p.birth_year,
-            "height": p.height,
-            "fav_cuisine": p.fav_cuisine,
-            "fav_colour": p.fav_colour,
-            "fav_school_subject": p.fav_school_subject,
-            "political": p.political,
-            "religious": p.religious,
-            "family_oriented": p.family_oriented
-        } for p in profiles])
+        profiles = Profile.query.order_by(Profile.id.desc()).limit(4).all()
+
+        results = []
+        for p in profiles:
+            user = Users.query.get(p.user_id_fk)
+            results.append({
+                "id": p.id,
+                "user_id": p.user_id_fk,
+                "name": user.name,
+                "photo": url_for('get_image', filename=user.photo, _external=True),
+                "description": p.description,
+                "parish": p.parish,
+                "biography": p.biography,
+                "sex": p.sex,
+                "race": p.race,
+                "birth_year": p.birth_year,
+                "height": p.height,
+                "fav_cuisine": p.fav_cuisine,
+                "fav_colour": p.fav_colour,
+                "fav_school_subject": p.fav_school_subject,
+                "political": p.political,
+                "religious": p.religious,
+                "family_oriented": p.family_oriented
+            })
+
+        return jsonify(results)
 
     elif request.method == 'POST':
         if not current_user.is_authenticated:
@@ -143,13 +151,18 @@ def profiles():
 
         return form_errors(form)
 
-@app.route('/api/profiles/<profile_id>', methods=['GET']) #undone
+@app.route('/api/profiles/<profile_id>', methods=['GET'])
 def get_profile(profile_id):
     profile = Profile.query.get_or_404(profile_id)
-    if profile:
+    user = Users.query.get(profile.user_id_fk)
+
+    if profile and user:
         return jsonify({
             "id": profile.id,
             "user_id": profile.user_id_fk,
+            "name": user.name,
+            "email": user.email,
+            "photo": user.photo,
             "description": profile.description,
             "parish": profile.parish,
             "biography": profile.biography,
@@ -164,7 +177,8 @@ def get_profile(profile_id):
             "religious": profile.religious,
             "family_oriented": profile.family_oriented
         })
-    return jsonify({"message": "Profile doesnt exist."}), 400
+
+    return jsonify({"message": "Profile doesn't exist."}), 400
 
 
 @app.route('/api/profiles/<user_id>/favourite', methods=['POST'])
@@ -316,6 +330,15 @@ def top_favourited_users(N):
             })
 
     return jsonify(top_users)
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(os.path.join(os.getcwd(), 'uploads'), filename)
+
+@app.route('/uploads/<filename>')
+def get_image(filename):
+    return send_from_directory('uploads', filename)
+
 
 ###
 # The functions below should be applicable to all Flask apps.

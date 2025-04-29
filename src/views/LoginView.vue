@@ -13,7 +13,7 @@
         components: {
             LoginForm
         },
-    };
+    };    
 </script>
   
 <style scoped>

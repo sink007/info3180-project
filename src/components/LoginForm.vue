@@ -17,62 +17,72 @@
 </template>
 
 <script setup>
-    import { ref, onMounted } from 'vue';
-    import { useRouter } from 'vue-router';  // This is for navigation after login.
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-    const username = ref('');
-    const password = ref('');
-    let csrf_token = ref('');
-    const router = useRouter(); // For page redirection after login.
+const username = ref('');
+const password = ref('');
+const csrf_token = ref('');
+const router = useRouter();
 
-    // Fetch the CSRF token (if needed, can remove if not required)
-    function getCsrfToken() {
-        fetch('/api/v1/csrf-token')
+// Fetch CSRF token
+function getCsrfToken() {
+    fetch('/api/v1/csrf-token')
         .then((response) => response.json())
         .then((data) => {
             csrf_token.value = data.csrf_token;
         });
+}
+
+// 🚀 CHECK LOGIN STATUS ON PAGE LOAD
+onMounted(() => {
+    getCsrfToken();
+    
+    // If already logged in, redirect to profiles
+    const loggedIn = sessionStorage.getItem("loggedIn") === "true";
+    if (loggedIn) {
+        router.push('/profiles');
     }
+});
 
-    // Fetch CSRF token when component mounts
-    onMounted(() => {
-        getCsrfToken();
-    });
-
-    // Handle user login
-    const loginUser = async () => {
-        let loginForm = document.getElementById('loginForm');
-        let form_data = new FormData(loginForm);
-        form_data.append('username', username.value);
-        form_data.append('password', password.value);
-
-        try {
-            let response = await fetch('/api/auth/login', {
-                method: 'POST',
-                body: form_data,
-                headers: {
+// Handle login
+const loginUser = async () => {
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
                 'X-CSRFToken': csrf_token.value,
-                },
-            });
+            },
+            body: JSON.stringify({
+                username: username.value,
+                password: password.value,
+            }),
+        });
 
-            if (response.ok) {
-                let data = await response.json();
-                router.push('/');
-                console.log("Login successful");
-            } else {
-                let errorData = await response.json();
-                console.error("Login failed:", errorData);
-            }
+        if (response.ok) {
+            const data = await response.json();
+
+            sessionStorage.setItem("loggedIn", "true");
+            sessionStorage.setItem("userId", data.id);
+
+            window.location.href = "/profiles"; 
+        } else {
+            const errorData = await response.json();
+            console.error("Login failed:", errorData);
+            alert("Login failed. Please try again.");
         }
-        catch (error) {
-            console.error('Error:', error);
-        }
-    };
+    } catch (error) {
+        console.error('Error:', error);
+        alert("An error occurred during login.");
+    }
+};
+
 </script>
 
 <style scoped>
-    .container {
-        max-width: 600px;
-        margin: auto;
-    }
+.container {
+    max-width: 600px;
+    margin: auto;
+}
 </style>

@@ -1,31 +1,45 @@
 <template>
-    <div class="container mt-5 text-center">
-      <p>Logging you out...</p>
-    </div>
-  </template>
-  
-  <script setup>
-  import { onMounted } from 'vue'
-  import { useRouter } from 'vue-router'
-  
-  const router = useRouter()
-  
-  onMounted(async () => {
-    try {
-        const response = await fetch('/api/auth/logout', {
-            method: 'POST',
-        });
-        sessionStorage.removeItem('loggedIn');
-        router.push('/login');
-    } catch (err) {
-      console.error('Logout error:', err);
+  <div class="container mt-5 text-center">
+    <p>Logging you out...</p>
+  </div>
+</template>
+
+<script setup>
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+async function logout() {
+  try {
+    const response = await fetch('/api/auth/logout', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+      }
+    });
+    if (response.ok) {
+      sessionStorage.removeItem('token');
+      alert('Logout successful!');
+      router.push('/login');
+    } else {
+      alert('Logout failed.');
     }
-  });
-  </script>
-  
-  <style scoped>
-  .container {
-    margin-top: 100px;
+  } catch (error) {
+    console.error(error);
+    alert('Logout failed.');
   }
-  </style>
+}
+
+onMounted(() => {
+  logout();
+});
+</script>
+
+<style scoped>
+.container {
+  margin-top: 100px;
+}
+</style>
+
   

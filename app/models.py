@@ -49,6 +49,7 @@ class Profile(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id_fk = db.Column(db.Integer)
+    photo = db.Column(db.String(255))
     description = db.Column(db.String(255))
     parish = db.Column(db.String(80))
     biography = db.Column(db.String(255))
