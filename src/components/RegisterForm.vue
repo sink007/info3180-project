@@ -33,13 +33,14 @@
 
 <script setup>
     import { ref, onMounted } from 'vue';
-
+    import { useRouter } from 'vue-router'; 
     const username = ref('');
     const password = ref('');
     const name = ref('');
     const email = ref('');
     const photo = ref(null);
     let csrf_token = ref('');
+    const router = useRouter();
 
     function getCsrfToken() {
         fetch('/api/v1/csrf-token')
@@ -77,7 +78,11 @@
             });
 
             let data = await response.json();
-            console.log(data);
+            if (response.ok){
+                router.push({ name: 'home' });
+                alert(data.message)
+                console.log(data);
+            }
         } catch (error) {
             console.error('Error:', error);
         }

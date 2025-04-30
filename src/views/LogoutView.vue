@@ -27,6 +27,7 @@ async function logout() {
     }
   } catch (error) {
     console.error(error);
+    console.log('Token:', sessionStorage.getItem('token'));
     alert('Logout failed.');
   }
 }

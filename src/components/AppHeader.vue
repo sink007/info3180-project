@@ -24,15 +24,31 @@ import { ref, onMounted } from "vue";
 
 const isLoggedIn = ref(false);
 const router = useRouter();
+const csrf_token = ref('');
+
+function getCsrfToken() {
+    fetch('/api/v1/csrf-token')
+        .then((response) => response.json())
+        .then((data) => {
+            csrf_token.value = data.csrf_token;
+            console.log('CSRF Token:', csrf_token.value); 
+        });
+}
 
 onMounted(() => {
+  getCsrfToken();
   isLoggedIn.value = sessionStorage.getItem("loggedIn") === "true";
+ 
 });
 
 const logoutUser = async () => {
   try {
     const response = await fetch("/api/auth/logout", {
       method: "POST",
+      credentials: "include", // <--- This is critical for session-based auth
+      headers: {
+        'X-CSRFToken': csrf_token.value
+      }
     });
 
     if (response.ok) {

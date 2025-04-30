@@ -1,29 +1,24 @@
-# Add any model classes for Flask-SQLAlchemy here
 from . import db
 from werkzeug.security import generate_password_hash
 
 class Users(db.Model):
-    # You can use this to change the table name. The default convention is to use
-    # the class name. In this case a class name of UserProfile would create a
-    # user_profile (singular) table, but if we specify __tablename__ we can change it
-    # to `user_profiles` (plural) or some other name.
-    __tablename__ = 'Users'
+    __tablename__ = 'users'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # auto-increment added
     username = db.Column(db.String(80), unique=True)
-    password= db.Column(db.String(255))
+    password = db.Column(db.String(255))
     name = db.Column(db.String(80))
     email = db.Column(db.String(80))
     photo = db.Column(db.String(80))
-    date_joined= db.Column(db.DateTime)
+    date_joined = db.Column(db.DateTime)
 
-    def __init__(self, username,password,name,email,photo,date_joined):
-        self.username=username
-        self.password=generate_password_hash(password, method='pbkdf2:sha256')
-        self.name=name
-        self.email=email
-        self.photo=photo
-        self.date_joined=date_joined
+    def __init__(self, username, password, name, email, photo, date_joined):
+        self.username = username
+        self.password = generate_password_hash(password, method='pbkdf2:sha256')
+        self.name = name
+        self.email = email
+        self.photo = photo
+        self.date_joined = date_joined
 
     def is_authenticated(self):
         return True
@@ -43,11 +38,11 @@ class Users(db.Model):
     def __repr__(self):
         return '<User %r>' % (self.username)
     
+
 class Profile(db.Model):
+    __tablename__ = 'profile'
 
-    __tablename__ = 'Profile'
-
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # auto-increment added
     user_id_fk = db.Column(db.Integer)
     photo = db.Column(db.String(255))
     description = db.Column(db.String(255))
@@ -99,18 +94,18 @@ class Profile(db.Model):
     def __repr__(self):
         return '<UserProfile %r>' % (self.user_id_fk)
     
+
 class Favourite(db.Model):
+    __tablename__ = 'favourite'
 
-    __tablename__ = 'Favourite'
-
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # auto-increment added
     user_id_fk = db.Column(db.Integer, nullable=False)
     fav_user_id_fk = db.Column(db.Integer, nullable=False)
 
     def __init__(self, user_id_fk, fav_user_id_fk):
         self.user_id_fk = user_id_fk
         self.fav_user_id_fk = fav_user_id_fk
-    
+
     def is_authenticated(self):
         return True
 
@@ -128,5 +123,3 @@ class Favourite(db.Model):
 
     def __repr__(self):
         return '<Favourite %r>' % (self.fav_user_id_fk)
-
-    

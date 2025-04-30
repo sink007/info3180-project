@@ -17,6 +17,7 @@ from flask_wtf.csrf import generate_csrf
 from werkzeug.security import check_password_hash
 from flask_wtf import csrf
 from app import csrf
+from sqlalchemy import func, case
 ###
 
 ###
@@ -31,7 +32,7 @@ def index():
 def get_csrf():
     return jsonify({'csrf_token': generate_csrf()})
 
-@app.route("/api/register",  methods=['POST'])
+@app.route("/api/register",  methods=['POST']) #done
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
@@ -55,7 +56,6 @@ def register():
 
         db.session.add(new_user)
         db.session.commit()
-
         return jsonify({
             "message": "User Successfully added",
             "username": new_user.username,
@@ -69,7 +69,7 @@ def register():
     else:
         return form_errors(form)
 
-@app.route('/api/auth/login', methods=['POST', 'GET']) #undone
+@app.route('/api/auth/login', methods=['POST', 'GET']) #done
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -87,17 +87,17 @@ def login():
         else:
             return jsonify({"message": "Invalid credentials"}), 401
 
-@csrf.exempt
-@app.route('/api/auth/logout', methods=['POST'])
+@app.route('/api/auth/logout', methods=['POST'])  #undone
+@login_required
 def logout():
+    logout_user()
     return jsonify({"message": "Logged out successfully."}), 200
 
-@app.route('/api/profiles', methods=['GET', 'POST'])
+@app.route('/api/profiles', methods=['GET', 'POST']) #done
 @login_required
 def profiles():
     if request.method == 'GET':
-        profiles = Profile.query.order_by(Profile.id.desc()).limit(4).all()
-
+        profiles = Profile.query.order_by(Profile.id.desc()).all()
         results = []
         for p in profiles:
             user = Users.query.get(p.user_id_fk)
@@ -127,6 +127,11 @@ def profiles():
         if not current_user.is_authenticated:
             return jsonify({"error": "Unauthorized"}), 401
 
+        # Check how many profiles this user already has
+        profile_count = Profile.query.filter_by(user_id_fk=current_user.id).count()
+        if profile_count >= 3:
+            return jsonify({"message": "Profile limit reached. You can only create up to 3 profiles."}), 403
+
         form = ProfileForm()
         if form.validate_on_submit():
             new_profile = Profile(
@@ -151,7 +156,7 @@ def profiles():
 
         return form_errors(form)
 
-@app.route('/api/profiles/<profile_id>', methods=['GET'])
+@app.route('/api/profiles/<profile_id>', methods=['GET'])#done
 def get_profile(profile_id):
     profile = Profile.query.get_or_404(profile_id)
     user = Users.query.get(profile.user_id_fk)
@@ -181,10 +186,12 @@ def get_profile(profile_id):
     return jsonify({"message": "Profile doesn't exist."}), 400
 
 
-@app.route('/api/profiles/<user_id>/favourite', methods=['POST'])
+@app.route('/api/profiles/<user_id>/favourite', methods=['POST'])#done
 @login_required
 def favourite_user(user_id):
-    if current_user.id == user_id:
+    profile = Profile.query.get(user_id)
+    user_id = profile.user_id_fk
+    if user_id== current_user.id: 
         return jsonify({"message": "You cannot favourite yourself."}), 400
 
     if Favourite.query.filter_by(user_id_fk=current_user.id, fav_user_id_fk=user_id).first():
@@ -195,57 +202,62 @@ def favourite_user(user_id):
     db.session.commit()
     return jsonify({"message": "User added to favourites."})
 
-@app.route('/api/profiles/matches/<profile_id>', methods=['GET'])   #undone
+@app.route('/api/profiles/<user_id>/is-favourited', methods=['GET'])#done
+@login_required
+def is_favourited(user_id):
+    # Check if the current user has already favourited this user
+    fav = Favourite.query.filter_by(user_id_fk=current_user.id, fav_user_id_fk=user_id).first()
+
+    if fav:
+        return jsonify({"isFavourited": True})
+    else:
+        return jsonify({"isFavourited": False})
+
+@app.route('/api/profiles/matches/<profile_id>', methods=['GET'])
 @login_required
 def get_profile_matches(profile_id):
-    base = Profile.query.get_or_404(profile_id)
+    try:
+        base = Profile.query.get_or_404(profile_id)
+        match_score = (
+            case((Profile.fav_cuisine == base.fav_cuisine, 1), else_=0) +
+            case((Profile.fav_colour == base.fav_colour, 1), else_=0) +
+            case((Profile.fav_school_subject == base.fav_school_subject, 1), else_=0) +
+            case((Profile.political == base.political, 1), else_=0) +
+            case((Profile.religious == base.religious, 1), else_=0) +
+            case((Profile.family_oriented == base.family_oriented, 1), else_=0)
+        )
+        matches = (
+            db.session.query(Profile, match_score.label("match_count"))
+            .filter(  
+                func.abs(Profile.birth_year - base.birth_year) <= 5,
+                func.abs(Profile.height - base.height).between(3, 10),
+                match_score >= 3
+            )
+            .all()
+        )
+        result = []
+        for match, match_count in matches:
+           result.append({
+            "id": match.id,
+            "user_id": match.user_id_fk,
+            "birth_year": match.birth_year,
+            "sex": match.sex,
+            "height": match.height,
+            "fav_cuisine": match.fav_cuisine,
+            "fav_colour": match.fav_colour,
+            "parish": match.parish,
+            "fav_school_subject": match.fav_school_subject,
+            "political": match.political,
+            "religious": match.religious,
+            "family_oriented": match.family_oriented,
+            "match_count": match_count,
+        })
+        return jsonify(result if result else {"message": "No matches found"}), 200
 
-    candidates = Profile.query.filter(
-        Profile.id != base.id,  # not the same profile
-        Profile.user_id_fk != base.user_id_fk,  # not same user
-        Profile.birth_year.between(base.birth_year - 5, base.birth_year + 5),
-        db.func.abs(Profile.height - base.height).between(3, 10)
-    ).all()
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
-    def count_matches(p1, p2):
-        match_fields = [
-            p1.fav_cuisine == p2.fav_cuisine,
-            p1.fav_colour == p2.fav_colour,
-            p1.fav_school_subject == p2.fav_school_subject,
-            p1.political == p2.political,
-            p1.religious == p2.religious,
-            p1.family_oriented == p2.family_oriented
-        ]
-        return sum(match_fields)
-
-    # filter based on matching at least 3 of the 6 criteria
-    matches = []
-
-    if candidates:
-        for candidate in candidates:
-            if count_matches(base, candidate) >= 3:
-                matches.append()
-
-    if matches:
-        return jsonify([
-            {
-                "id": m.id,
-                "user_id": m.user_id_fk,
-                "birth_year": m.birth_year,
-                "height": m.height,
-                "fav_cuisine": m.fav_cuisine,
-                "fav_colour": m.fav_colour,
-                "fav_school_subject": m.fav_school_subject,
-                "political": m.political,
-                "religious": m.religious,
-                "family_oriented": m.family_oriented
-            }
-            for m in matches
-        ])
-    else:
-        return jsonify({"message": "No matches found"})
-    
-@app.route('/api/search', methods=['GET'])
+@app.route('/api/search', methods=['GET'])#done
 def search_profiles():
     form = SearchForm()
     if form.validate_on_submit():
@@ -279,7 +291,7 @@ def search_profiles():
     return form_errors(form)
 
 
-@app.route('/api/users/<int:user_id>', methods=['GET'])
+@app.route('/api/users/<int:user_id>', methods=['GET'])#done
 def get_user(user_id):
     user = Users.query.get_or_404(user_id)
     if user:

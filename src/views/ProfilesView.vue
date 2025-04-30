@@ -25,13 +25,13 @@
           <div class="profile-card">
             <img :src="profile.photo" alt="Profile Image" class="bg-img" />
 
-              <div class="overlay">
-                <div class="text-block">
-                  <p class="name">{{ profile.name }}</p>
-                  <p class="parish">{{ profile.parish }}</p>
-                  <router-link :to="`/profiles/${profile.id}`" class="btn btn-light">View Profile</router-link>
-                </div>
+            <div class="overlay">
+              <div class="text-block">
+                <p class="name">{{ profile.name }}</p>
+                <p class="parish">{{ profile.parish }}</p>
+                <router-link :to="`/profiles/${profile.id}`" class="btn btn-light">View Profile</router-link>
               </div>
+            </div>
           </div>
         </div>
       </div>
@@ -63,8 +63,8 @@ onMounted(async () => {
 const filteredProfiles = computed(() => {
   const term = searchTerm.value.toLowerCase();
 
-  return profiles.value.filter(profile => {
-    if (!term) return true; // show all if search is empty
+  const filtered = profiles.value.filter(profile => {
+    if (!term) return true;
 
     switch (selectedFilter.value) {
       case 'Name':
@@ -76,13 +76,15 @@ const filteredProfiles = computed(() => {
       case 'Birth':
         return profile.birth_year && profile.birth_year.toString().includes(term);
       default:
-        // no filter selected: search across name + parish
         return (
           profile.name.toLowerCase().includes(term) ||
           profile.parish.toLowerCase().includes(term)
         );
     }
   });
+
+  // Limit to the 4 most recent profiles
+  return filtered.slice(0, 4);
 });
 </script>
 
@@ -107,7 +109,6 @@ const filteredProfiles = computed(() => {
   background-color: #333;
   color: #fff;
 }
-
 
 .card-img-top {
   object-fit: cover;
@@ -141,7 +142,7 @@ const filteredProfiles = computed(() => {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  height: 100px; /* fixed height to contain bottom placement */
+  height: 100px;
 }
 
 .text-block {
@@ -168,5 +169,4 @@ const filteredProfiles = computed(() => {
   font-size: 0.85rem;
   margin-top: 6px;
 }
-
 </style>

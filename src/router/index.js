@@ -21,7 +21,7 @@ const routes = [
   { path: '/profiles/:id', name: 'profile-detail', component: ProfileDetailView },
 
   { path: '/favourites', name: 'favourites', component: FavouritesView },
-  { path: '/matches', name: 'matches', component: MatchesView },
+  { path: '/profiles/matches/:id', name: 'matches', component: MatchesView },
 
   { path: '/my-profile', name: 'my-profile', component: MyProfileView },
   { path: '/profiles/new', name: 'new-profile', component: CreateProfileView }, 

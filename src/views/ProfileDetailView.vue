@@ -32,10 +32,11 @@
         <button class="btn btn-primary" @click="emailUser">Email User</button>
         <button 
           class="btn" 
-          :class="isFavourited ? 'btn-warning' : 'btn-success'" 
+          :class="isFavourited ? 'text-danger' : 'text-muted'" 
           @click="addToFavourites"
+          style="font-size: 2rem;"
         >
-          {{ isFavourited ? 'Favourited' : 'Favourite' }}
+          <i class="fa" :class="isFavourited ? 'fa-heart' : 'fa-heart'"></i>
         </button>
       </div>
     </div>
@@ -54,11 +55,30 @@ const route = useRoute();
 let profile = ref(null);
 let loading = ref(true);
 let isFavourited = ref(false);  // new
+let csrf_token = ref('');
+
+// Get CSRF token
+function getCsrfToken() {
+  fetch('/api/v1/csrf-token')
+    .then((response) => response.json())
+    .then((data) => {
+      csrf_token.value = data.csrf_token;
+    });
+}
+
+onMounted(() => {
+  getCsrfToken();
+});
 
 onMounted(async () => {
   try {
     const response = await fetch(`/api/profiles/${route.params.id}`);
     profile.value = await response.json();
+
+    // Check if the profile is already favourited
+    const favResponse = await fetch(`/api/profiles/${route.params.id}/is-favourited`);
+    const favData = await favResponse.json();
+    isFavourited.value = favData.isFavourited;  // Automatically set heart to red if favourited
   } catch (error) {
     console.error(error);
   } finally {
@@ -66,19 +86,25 @@ onMounted(async () => {
   }
 });
 
+// Add to favourites
 async function addToFavourites() {
   try {
     const response = await fetch(`/api/profiles/${route.params.id}/favourite`, {
-      method: 'POST'
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrf_token.value,
+      },
     });
     const data = await response.json();
     alert(data.message);
-    isFavourited.value = true; // button changes color after click
+    if (data.message === "User added to favourites.")
+      isFavourited.value = true; // heart turns red after click
   } catch (error) {
     console.error(error);
   }
 }
 
+// Email user
 function emailUser() {
   if (profile.value && profile.value.email) {
     window.location.href = `mailto:${profile.value.email}`;
@@ -87,3 +113,8 @@ function emailUser() {
   }
 }
 </script>
+
+<style scoped>
+/* Ensure Font Awesome icons load properly */
+@import url(https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css);
+</style>
