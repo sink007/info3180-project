@@ -118,7 +118,8 @@ def profiles():
                 "fav_school_subject": p.fav_school_subject,
                 "political": p.political,
                 "religious": p.religious,
-                "family_oriented": p.family_oriented
+                "family_oriented": p.family_oriented,
+                "fav_count": p.fav_count
             })
 
         return jsonify(results)
@@ -148,7 +149,7 @@ def profiles():
                 fav_school_subject=form.fav_school_subject.data,
                 political=form.political.data,
                 religious=form.religious.data,
-                family_oriented=form.family_oriented.data
+                family_oriented=form.family_oriented.data,
             )
             db.session.add(new_profile)
             db.session.commit()
@@ -160,7 +161,6 @@ def profiles():
 def get_profile(profile_id):
     profile = Profile.query.get_or_404(profile_id)
     user = Users.query.get(profile.user_id_fk)
-
     if profile and user:
         return jsonify({
             "id": profile.id,
@@ -180,33 +180,36 @@ def get_profile(profile_id):
             "fav_school_subject": profile.fav_school_subject,
             "political": profile.political,
             "religious": profile.religious,
-            "family_oriented": profile.family_oriented
+            "family_oriented": profile.family_oriented,
+            "fav_count": profile.fav_count
         })
 
     return jsonify({"message": "Profile doesn't exist."}), 400
 
 
-@app.route('/api/profiles/<user_id>/favourite', methods=['POST'])#done
+@app.route('/api/profiles/<int:user_id>/favourite', methods=['POST'])
 @login_required
 def favourite_user(user_id):
     profile = Profile.query.get(user_id)
-    user_id = profile.user_id_fk
-    if user_id== current_user.id: 
+    if profile.user_id_fk == current_user.id:
         return jsonify({"message": "You cannot favourite yourself."}), 400
-
+    
     if Favourite.query.filter_by(user_id_fk=current_user.id, fav_user_id_fk=user_id).first():
         return jsonify({"message": "User already favourited."}), 409
 
     fav = Favourite(user_id_fk=current_user.id, fav_user_id_fk=user_id)
     db.session.add(fav)
-    db.session.commit()
+
+    profile.fav_count += 1  
+    db.session.commit()  
     return jsonify({"message": "User added to favourites."})
 
-@app.route('/api/profiles/<user_id>/is-favourited', methods=['GET'])#done
+
+@app.route('/api/profiles/<profile_id>/is-favourited', methods=['GET'])#done
 @login_required
-def is_favourited(user_id):
-    # Check if the current user has already favourited this user
-    fav = Favourite.query.filter_by(user_id_fk=current_user.id, fav_user_id_fk=user_id).first()
+def is_favourited(profile_id):
+    # Check if the current user has already favourited this profile
+    fav = Favourite.query.filter_by(user_id_fk=current_user.id, fav_user_id_fk=profile_id).first()
 
     if fav:
         return jsonify({"isFavourited": True})
@@ -250,7 +253,8 @@ def get_profile_matches(profile_id):
             "political": match.political,
             "religious": match.religious,
             "family_oriented": match.family_oriented,
-            "match_count": match_count,
+            "fav_count": match.fav_count,
+            "match_count": match_count
         })
         return jsonify(result if result else {"message": "No matches found"}), 200
 
@@ -323,25 +327,43 @@ def get_user_favourites(user_id):
 
 @app.route('/api/users/favourites/<int:N>', methods=['GET'])
 def top_favourited_users(N):
-    from sqlalchemy import func
-
-    fav_counts = db.session.query(
-        Favourite.fav_user_id_fk,
-        func.count(Favourite.id).label('count')
-    ).group_by(Favourite.fav_user_id_fk).order_by(func.count(Favourite.id).desc()).limit(N).all()
-
-    top_users = []
-    for user_id, count in fav_counts:
-        user = Users.query.get(user_id)
-        if user:
-            top_users.append({
-                "id": user.id,
-                "username": user.username,
+    try:
+        # Join Profile and Users, order by fav_count descending
+        results = (
+            db.session.query(Profile, Users)
+            .join(Users, Profile.user_id_fk == Users.id)
+            .order_by(Profile.fav_count.desc())
+            .limit(N)
+            .all()
+        )
+        profiles = []
+        for profile, user in results:
+            profiles.append({
+                "id": profile.id,
+                "user_id": profile.user_id_fk,
                 "name": user.name,
-                "favourite_count": count
+                "email": user.email,
+                "photo": user.photo,
+                "description": profile.description,
+                "parish": profile.parish,
+                "biography": profile.biography,
+                "sex": profile.sex,
+                "race": profile.race,
+                "birth_year": profile.birth_year,
+                "height": profile.height,
+                "fav_cuisine": profile.fav_cuisine,
+                "fav_colour": profile.fav_colour,
+                "fav_school_subject": profile.fav_school_subject,
+                "political": profile.political,
+                "religious": profile.religious,
+                "family_oriented": profile.family_oriented,
+                "fav_count": profile.fav_count
             })
 
-    return jsonify(top_users)
+        return jsonify(profiles), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):

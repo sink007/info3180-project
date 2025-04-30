@@ -28,6 +28,22 @@
         </div>
       </div>
 
+      <div class="row text-center mt-3">
+        <div class="col-md-6">
+          <p><strong>Favourite Cuisine:</strong> {{ profile.fav_cuisine }}</p>
+          <p><strong>Favourite School Subject:</strong> {{ profile.fav_school_subject }}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Political:</strong> {{ profile.political ? 'Yes' : 'No' }}</p>
+          <p><strong>Religious:</strong> {{ profile.religious ? 'Yes' : 'No' }}</p>
+          <p><strong>Family Oriented:</strong> {{ profile.family_oriented ? 'Yes' : 'No' }}</p>
+        </div>
+      </div>
+
+      <p class="text-center mt-3">
+        <strong>Favourited:</strong> {{ profile.fav_count }} time(s) 
+      </p>
+
       <div class="d-flex justify-content-center gap-3 mt-4">
         <button class="btn btn-primary" @click="emailUser">Email User</button>
         <button 
@@ -54,7 +70,7 @@ import { useRoute } from 'vue-router';
 const route = useRoute();
 let profile = ref(null);
 let loading = ref(true);
-let isFavourited = ref(false);  // new
+let isFavourited = ref(false);
 let csrf_token = ref('');
 
 // Get CSRF token
@@ -72,13 +88,18 @@ onMounted(() => {
 
 onMounted(async () => {
   try {
+    console.log(route.params.id);
     const response = await fetch(`/api/profiles/${route.params.id}`);
     profile.value = await response.json();
+    console.log(profile.value.fav_count)
+    console.log(profile.value);
 
     // Check if the profile is already favourited
-    const favResponse = await fetch(`/api/profiles/${route.params.id}/is-favourited`);
+    const favResponse = await fetch(`/api/profiles/${profile.value.id}/is-favourited`);
     const favData = await favResponse.json();
-    isFavourited.value = favData.isFavourited;  // Automatically set heart to red if favourited
+    if (favData.isFavourited === true) {
+      isFavourited.value = true;
+    }
   } catch (error) {
     console.error(error);
   } finally {
@@ -89,7 +110,7 @@ onMounted(async () => {
 // Add to favourites
 async function addToFavourites() {
   try {
-    const response = await fetch(`/api/profiles/${route.params.id}/favourite`, {
+    const response = await fetch(`/api/profiles/${profile.value.id}/favourite`, {
       method: 'POST',
       headers: {
         'X-CSRFToken': csrf_token.value,
@@ -97,8 +118,10 @@ async function addToFavourites() {
     });
     const data = await response.json();
     alert(data.message);
-    if (data.message === "User added to favourites.")
-      isFavourited.value = true; // heart turns red after click
+    if (data.message === "User added to favourites.") {
+      isFavourited.value = true; // Heart turns red
+      profile.value.fav_count += 1;
+    }
   } catch (error) {
     console.error(error);
   }

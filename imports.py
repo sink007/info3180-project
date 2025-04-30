@@ -1,6 +1,5 @@
 from werkzeug.security import generate_password_hash
 import random
-from datetime import datetime
 import psycopg2
 
 # Predefined data
@@ -16,23 +15,23 @@ fav_colours = ["Red", "Blue", "Green", "Yellow", "Purple", "Black"]
 
 sql_lines = []
 
-# Generate users
+# Generate users (50 users, no explicit id)
 sql_lines.append("-- Insert Users")
 sql_lines.append("INSERT INTO users (username, password, name, email, photo, date_joined) VALUES")
 user_entries = []
-for i in range(1, 11):
-    hashed_password = generate_password_hash('123', method='pbkdf2:sha256')  # Hash the password
+for i in range(1, 51):
+    hashed_password = generate_password_hash('123', method='pbkdf2:sha256')
     user_entries.append(
         f"('user{i}', '{hashed_password}', 'User {i}', 'user{i}@example.com', 'user{i}.jpg', CURRENT_TIMESTAMP)"
     )
 sql_lines.append(",\n".join(user_entries) + ";\n")
 
-# Generate profiles
+# Generate profiles (3 per user, still need user_id_fk)
 sql_lines.append("-- Insert Profiles")
 profile_entries = []
 profile_id = 1
-for user_id in range(1, 11):
-    for _ in range(3):  # 3 profiles per user
+for user_id in range(1, 51):
+    for _ in range(3):
         profile_entries.append(
             f"({user_id}, 'Profile {profile_id} for user{user_id}', "
             f"'{random.choice(parishes)}', "
@@ -46,13 +45,13 @@ for user_id in range(1, 11):
             f"'{random.choice(fav_school_subjects)}', "
             f"{random.choice([True, False])}, "
             f"{random.choice([True, False])}, "
-            f"{random.choice([True, False])})"
+            f"{random.choice([True, False])}, "
+            f"{random.randint(0, 50)})"
         )
         profile_id += 1
 
-sql_lines.append("INSERT INTO profile (user_id_fk, description, parish, biography, sex, race, birth_year, height, fav_cuisine, fav_colour, fav_school_subject, political, religious, family_oriented) VALUES")
+sql_lines.append("INSERT INTO profile (user_id_fk, description, parish, biography, sex, race, birth_year, height, fav_cuisine, fav_colour, fav_school_subject, political, religious, family_oriented, fav_count) VALUES")
 sql_lines.append(",\n".join(profile_entries) + ";")
-
 
 # Write to file
 with open("profiles.sql", "w") as f:
@@ -60,7 +59,7 @@ with open("profiles.sql", "w") as f:
 
 print("SQL statements written to profiles.sql")
 
-# Read and execute the SQL file
+# Execute the SQL
 with open("profiles.sql", "r") as f:
     sql = f.read()
 
