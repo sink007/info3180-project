@@ -43,14 +43,16 @@
     const router = useRouter();
 
     function getCsrfToken() {
-        fetch('https://info3180-project-lof1.onrender.com/api/v1/csrf-token')
-        .then((response) => response.json())
-        .then((data) => {
-            console.log(data);
-            console.log("csrf work");
-            csrf_token.value = data.csrf_token;
-        });
-    }
+    fetch('/api/v1/csrf-token', {
+        credentials: 'include' 
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        console.log(data);
+        csrf_token.value = data.csrf_token;
+    });
+}
+
 
     onMounted(() => {
         getCsrfToken();
@@ -76,6 +78,7 @@
             headers: {
                 'X-CSRFToken': csrf_token.value,
             },
+            credentials: 'include' 
         });
 
         const text = await response.text();  // Don't try to parse as JSON yet
