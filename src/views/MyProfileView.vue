@@ -68,17 +68,17 @@ onMounted(async () => {
   if (!userId) return router.push('/login');
 
   try {
-    const userRes = await fetch(`https://info3180-project-lof1.onrender.com/api/users/${userId}`);
+    const userRes = await fetch(`/api/users/${userId}`);
     const user = await userRes.json();
     username.value = user.name;
     userPhoto.value = `/uploads/${user.photo}`;
 
-    const response = await fetch(`https://info3180-project-lof1.onrender.com/api/profiles`);
+    const response = await fetch(`/api/profiles`);
     const data = await response.json();
     profiles.value = data.filter(p => p.user_id === parseInt(userId));
 
     // Fetch favourited profiles
-    const favRes = await fetch(`https://info3180-project-lof1.onrender.com/api/users/${userId}/favourites`);
+    const favRes = await fetch(`/api/users/${userId}/favourites`);
     const favData = await favRes.json();
     if (Array.isArray(favData)) {
       favourites.value = favData;
