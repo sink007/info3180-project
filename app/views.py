@@ -94,7 +94,6 @@ def logout():
     return jsonify({"message": "Logged out successfully."}), 200
 
 @app.route('/api/profiles', methods=['GET', 'POST']) #done
-@login_required
 def profiles():
     if request.method == 'GET':
         profiles = Profile.query.order_by(Profile.id.desc()).all()
