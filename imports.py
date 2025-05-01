@@ -1,7 +1,6 @@
 from werkzeug.security import generate_password_hash
 import random
 import psycopg2
-from urllib.parse import urlparse
 
 # Predefined data
 parishes = [
@@ -16,7 +15,7 @@ fav_colours = ["Red", "Blue", "Green", "Yellow", "Purple", "Black"]
 
 sql_lines = []
 
-# Generate users (50 users)
+# Generate users (50 users, no explicit id)
 sql_lines.append("-- Insert Users")
 sql_lines.append("INSERT INTO users (username, password, name, email, photo, date_joined) VALUES")
 user_entries = []
@@ -27,7 +26,7 @@ for i in range(1, 51):
     )
 sql_lines.append(",\n".join(user_entries) + ";\n")
 
-# Generate profiles (3 per user)
+# Generate profiles (3 per user, still need user_id_fk)
 sql_lines.append("-- Insert Profiles")
 profile_entries = []
 profile_id = 1
@@ -54,32 +53,26 @@ for user_id in range(1, 51):
 sql_lines.append("INSERT INTO profile (user_id_fk, description, parish, biography, sex, race, birth_year, height, fav_cuisine, fav_colour, fav_school_subject, political, religious, family_oriented, fav_count) VALUES")
 sql_lines.append(",\n".join(profile_entries) + ";")
 
-# Combine SQL statements
-full_sql = "\n".join(sql_lines)
+# Write to file
+with open("profiles.sql", "w") as f:
+    f.write("\n".join(sql_lines))
 
-# Render database connection string
-render_db_url = "postgresql://project_user:GgKw1i7jysoNpMnVvkpbvzgYjYB5ICJ2@dpg-d09sa89r0fns73f7e5a0-a.virginia-postgres.render.com/project_ps4g"
-url = urlparse(render_db_url)
+print("SQL statements written to profiles.sql")
 
-# Extract connection parameters
-dbname = url.path[1:]
-user = url.username
-password = url.password
-host = url.hostname
-port = url.port
+# Execute the SQL
+with open("profiles.sql", "r") as f:
+    sql = f.read()
 
-# Execute SQL on Render DB
 try:
     with psycopg2.connect(
-        dbname=dbname,
-        user=user,
-        password=password,
-        host=host,
-        port=port
+        dbname="project",
+        user="project_user",
+        password="123",
+        host="localhost",
+        port="5432"
     ) as conn:
         with conn.cursor() as cur:
-            cur.execute(full_sql)
+            cur.execute(sql)
             conn.commit()
-            print("SQL executed successfully on Render PostgreSQL.")
 except Exception as e:
     print(f"An error occurred: {e}")

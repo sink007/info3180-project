@@ -50,7 +50,7 @@ const selectedFilter = ref(null);
 
 onMounted(async () => {
   try {
-    const response = await fetch('/api/profiles');
+    const response = await fetch('https://info3180-project-lof1.onrender.com/api/profiles');
     const data = await response.json();
     profiles.value = data;
   } catch (error) {

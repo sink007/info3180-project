@@ -12,7 +12,7 @@ const router = useRouter()
 
 async function logout() {
   try {
-    const response = await fetch('/api/auth/logout', {
+    const response = await fetch('https://info3180-project-lof1.onrender.com/api/auth/logout', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${sessionStorage.getItem('token')}`

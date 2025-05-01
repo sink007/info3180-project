@@ -62,7 +62,7 @@ async function fetchTopProfiles() {
 
   loading.value = true;
   try {
-    const response = await fetch(`/api/users/favourites/${topN.value}`);
+    const response = await fetch(`https://info3180-project-lof1.onrender.com/api/users/favourites/${topN.value}`);
     profiles.value = await response.json();
   } catch (error) {
     console.error("Failed to load top favourites:", error);
