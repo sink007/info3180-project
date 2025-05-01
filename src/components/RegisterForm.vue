@@ -61,36 +61,39 @@
     };
 
     const registerUser = async () => {
-        let registerForm = document.getElementById('registerForm');
-        let form_data = new FormData(registerForm);
-        form_data.append('username', username.value);
-        form_data.append('password', password.value);
-        form_data.append('name', name.value);
-        form_data.append('email', email.value);
-        form_data.append('photo', photo.value);
-        console.log(form_data);
-        try {
-            let response = await fetch('https://info3180-project-lof1.onrender.com/api/register', {
-                method: 'POST',
-                body: form_data,
-                headers: {
-                'X-CSRFToken': csrf_token.value,
-                },
-            });
+    let registerForm = document.getElementById('registerForm');
+    let form_data = new FormData(registerForm);
+    form_data.append('username', username.value);
+    form_data.append('password', password.value);
+    form_data.append('name', name.value);
+    form_data.append('email', email.value);
+    form_data.append('photo', photo.value);
 
-            let data = await response.json();
-            if (response.ok){
-                router.push({ name: 'home' });
-                alert(data.message)
-                console.log(data);
-            }
-        } catch (error) {
-            let text = await response.text();
-            console.log("Server response:", text);
-            console.log("hey");
-            console.error('Error:', error);
+    try {
+        const response = await fetch('https://info3180-project-lof1.onrender.com/api/register', {
+            method: 'POST',
+            body: form_data,
+            headers: {
+                'X-CSRFToken': csrf_token.value,
+            },
+        });
+
+        const text = await response.text();  // Don't try to parse as JSON yet
+        console.log("Raw server response:", text);
+
+        if (response.ok) {
+            const data = JSON.parse(text);  // Now parse JSON safely
+            alert(data.message);
+            router.push({ name: 'home' });
+        } else {
+            console.error("Server returned an error:", text);
+            alert("Registration failed. See console for details.");
         }
-    };
+    } catch (error) {
+        console.log("Request failed:");
+        console.error('Error:', error);
+    }
+};
 </script>
 
 <style scoped>
