@@ -31,6 +31,7 @@ function getCsrfToken() {
         .then((response) => response.json())
         .then((data) => {
             csrf_token.value = data.csrf_token;
+            console.log("hey");
             console.log('CSRF Token:', csrf_token.value); 
         });
 }

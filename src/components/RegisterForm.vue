@@ -84,6 +84,7 @@
                 console.log(data);
             }
         } catch (error) {
+            console.log("hey");
             console.error('Error:', error);
         }
     };
