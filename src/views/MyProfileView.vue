@@ -30,6 +30,22 @@
         </div>
       </div>
     </div>
+    <!-- Favourited Profiles Section -->
+    <div class="mt-5" v-if="favourites.length">
+      <h3 class="text-center mb-4">Profiles You Have Favourited</h3>
+      <div class="row justify-content-center">
+        <div v-for="profile in favourites" :key="profile.id" class="col-md-4 mb-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+              <h5 class="card-title">{{ profile.description }}</h5>
+              <p><strong>Parish:</strong> {{ profile.parish }}</p>
+              <p><strong>Race:</strong> {{ profile.race }}</p>
+              <RouterLink :to="`/profiles/${profile.id}`" class="btn btn-outline-primary">Show More Details</RouterLink>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -41,6 +57,7 @@ const profiles = ref([]);
 const username = ref('');
 const userPhoto = ref('');
 const router = useRouter();
+const favourites = ref([]);
 
 const goToMatches = (profileId) => {
   router.push('/matches');
@@ -59,6 +76,14 @@ onMounted(async () => {
     const response = await fetch(`/api/profiles`);
     const data = await response.json();
     profiles.value = data.filter(p => p.user_id === parseInt(userId));
+
+    // Fetch favourited profiles
+    const favRes = await fetch(`/api/users/${userId}/favourites`);
+    const favData = await favRes.json();
+    if (Array.isArray(favData)) {
+      favourites.value = favData;
+      console.log(favourites.value[0])
+    }
   } catch (err) {
     console.error("Failed to load profiles or user info:", err);
   }

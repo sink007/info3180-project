@@ -313,15 +313,25 @@ def get_user(user_id):
 def get_user_favourites(user_id):
     user = Users.query.get_or_404(user_id)
     favs = Favourite.query.filter_by(user_id_fk=user.id).all()
-    fav_users = [Users.query.get(fav.fav_user_id_fk) for fav in favs]
-    if fav_users:
+    fav_profiles = [Profile.query.get(fav.fav_user_id_fk) for fav in favs]
+    if fav_profiles:
         return jsonify([{
             "id": x.id,
-            "username": x.username,
-            "name": x.name,
-            "email": x.email,
-            "photo": x.photo
-        } for x in fav_users])
+            "user_id": x.user_id_fk,
+            "birth_year": x.birth_year,
+            "sex": x.sex,
+            "height": x.height,
+            "race": x.race,
+            "description": x.description,
+            "fav_cuisine": x.fav_cuisine,
+            "fav_colour": x.fav_colour,
+            "parish": x.parish,
+            "fav_school_subject": x.fav_school_subject,
+            "political": x.political,
+            "religious": x.religious,
+            "family_oriented": x.family_oriented,
+            "fav_count": x.fav_count
+        } for x in fav_profiles])
     return jsonify({"message": "User has no favourite users"})
 
 
