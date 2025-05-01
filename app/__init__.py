@@ -4,17 +4,21 @@ from flask_sqlalchemy import SQLAlchemy
 from .config import Config
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
-from flask_cors import CORS  # ✅ CORS import
-from .config import Config
-
+from flask_cors import CORS  # <-- NEW
 
 app = Flask(__name__)
 csrf = CSRFProtect()
 csrf.init_app(app)
+
+# CORS setup for frontend hosted on Render
+CORS(app, origins=["https://info3180-project-1.onrender.com"], supports_credentials=True)
+
 app.config.from_object(Config)
 db = SQLAlchemy(app)
-from .models import Users,Profile,Favourite
+
+from .models import Users, Profile, Favourite
 migrate = Migrate(app, db)
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
