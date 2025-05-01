@@ -47,6 +47,7 @@
         .then((response) => response.json())
         .then((data) => {
             console.log(data);
+            console.log("csrf work");
             csrf_token.value = data.csrf_token;
         });
     }
@@ -84,6 +85,8 @@
                 console.log(data);
             }
         } catch (error) {
+            let text = await response.text();
+            console.log("Server response:", text);
             console.log("hey");
             console.error('Error:', error);
         }
