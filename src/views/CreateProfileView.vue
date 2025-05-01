@@ -75,11 +75,11 @@
   
   async function submitProfile() {
   try {
-    const csrfToken = await fetch('/api/v1/csrf-token')
+    const csrfToken = await fetch('https://info3180-project-lof1.onrender.com/api/v1/csrf-token')
       .then(response => response.json())
       .then(data => data.csrf_token);
 
-    const response = await fetch('/api/profiles', {
+    const response = await fetch('https://info3180-project-lof1.onrender.com/api/profiles', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

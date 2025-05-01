@@ -27,7 +27,7 @@ const router = useRouter();
 const csrf_token = ref('');
 
 function getCsrfToken() {
-    fetch('/api/v1/csrf-token')
+    fetch('https://info3180-project-lof1.onrender.com/api/v1/csrf-token')
         .then((response) => response.json())
         .then((data) => {
             csrf_token.value = data.csrf_token;
@@ -43,7 +43,7 @@ onMounted(() => {
 
 const logoutUser = async () => {
   try {
-    const response = await fetch("/api/auth/logout", {
+    const response = await fetch("https://info3180-project-lof1.onrender.com/api/auth/logout", {
       method: "POST",
       credentials: "include", // <--- This is critical for session-based auth
       headers: {

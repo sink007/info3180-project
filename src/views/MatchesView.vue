@@ -47,7 +47,7 @@ const loading = ref(true);
 const csrf_token = ref('');
 
 function getCsrfToken() {
-  fetch('/api/v1/csrf-token')
+  fetch('https://info3180-project-lof1.onrender.com/api/v1/csrf-token')
     .then((response) => response.json())
     .then((data) => {
       csrf_token.value = data.csrf_token;
@@ -58,7 +58,7 @@ async function loadMatches() {
   const profileId = route.params.id;
 
   try {
-    const response = await fetch(`/api/profiles/matches/${profileId}`, {
+    const response = await fetch(`https://info3180-project-lof1.onrender.com/api/profiles/matches/${profileId}`, {
       method: 'GET',
       headers: {
         'X-CSRFToken': csrf_token.value

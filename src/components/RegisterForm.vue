@@ -43,7 +43,7 @@
     const router = useRouter();
 
     function getCsrfToken() {
-        fetch('/api/v1/csrf-token')
+        fetch('https://info3180-project-lof1.onrender.com/api/v1/csrf-token')
         .then((response) => response.json())
         .then((data) => {
             console.log(data);
@@ -69,7 +69,7 @@
         form_data.append('photo', photo.value);
         console.log(form_data);
         try {
-            let response = await fetch('/api/register', {
+            let response = await fetch('https://info3180-project-lof1.onrender.com/api/register', {
                 method: 'POST',
                 body: form_data,
                 headers: {
