@@ -2,6 +2,9 @@ import { fileURLToPath, URL } from 'url';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 
+// Directly set the Render API URL
+const API_URL = 'https://info3180-project-lof1.onrender.com/'; // Your deployed Render backend URL
+
 export default defineConfig({
   plugins: [vue()],
   resolve: {
@@ -12,7 +15,7 @@ export default defineConfig({
   server: {
     proxy: {
       '^/api/.*': {
-        target: 'http://127.0.0.1:8080', 
+        target: API_URL,  // Directly use the Render API URL
         changeOrigin: true,
         rewrite: (path) => path, 
       }
