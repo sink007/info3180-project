@@ -11,6 +11,7 @@ app = Flask(__name__)
 # 🔐 Allow secure cookies for cross-site frontend/backend
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 app.config['SESSION_COOKIE_SECURE'] = True
+app.config['WTF_CSRF_CHECK_DEFAULT'] = False
 
 csrf = CSRFProtect()
 csrf.init_app(app)
