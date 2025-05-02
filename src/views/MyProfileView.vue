@@ -17,24 +17,24 @@
             <div class="d-flex justify-content-center gap-2 mt-2">
               <RouterLink :to="`/profiles/${profile.id}`" class="btn btn-outline-primary">Show More Details</RouterLink>
               <RouterLink :to="`/profiles/matches/${profile.id}`" class="btn btn-outline-success">Match Me</RouterLink>
-
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Add New Profile Cards -->
-      <div v-for="n in 3 - profiles.length" :key="'create-' + n" class="col-md-4 mb-4">
+      <!-- Create Profile Card (only if less than 3 profiles) -->
+      <div v-for="n in Math.max(0, 3 - profiles.length)" :key="'create-' + n" class="col-md-4 mb-4">
         <div class="card h-100 d-flex align-items-center justify-content-center text-center">
           <button @click="router.push('/profiles/new')" class="square-add-btn">+</button>
         </div>
       </div>
     </div>
+
     <!-- Favourited Profiles Section -->
     <div class="mt-5" v-if="favourites.length">
       <h3 class="text-center mb-4">Profiles You Have Favourited</h3>
       <div class="row justify-content-center">
-        <div v-for="profile in favourites" :key="profile.id" class="col-md-4 mb-4">
+        <div v-for="profile in favourites" :key="'fav-' + profile.id" class="col-md-4 mb-4">
           <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
               <h5 class="card-title">{{ profile.description }}</h5>
@@ -59,40 +59,32 @@ const userPhoto = ref('');
 const router = useRouter();
 const favourites = ref([]);
 
-const goToMatches = (profileId) => {
-  router.push(`/profiles/matches/${profileId}`);
-};
-
 onMounted(async () => {
   const userId = sessionStorage.getItem("userId");
-  const token = sessionStorage.getItem("token");
-
-  if (!userId || !token) {
-    return router.push('/login');
-  }
-
-  const headers = {
-    "Authorization": `Bearer ${token}`
-  };
+  if (!userId) return router.push('/login');
 
   try {
-    // Fetch user info (no token needed)
+    // Get logged in user info
     const userRes = await fetch(`/api/users/${userId}`);
     const user = await userRes.json();
     username.value = user.name;
     userPhoto.value = `/uploads/${user.photo}`;
 
-    // Fetch own profiles with token
-    const response = await fetch(`/api/profiles`, { headers });
-    const data = await response.json();
-    profiles.value = data.filter(p => p.user_id === parseInt(userId));
+    // Get all profiles and filter for just this user
+    const res = await fetch(`/api/profiles`, {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`
+      }
+    });
+    const data = await res.json();
+    profiles.value = Array.isArray(data)
+      ? data.filter(p => p.user_id === parseInt(userId))
+      : [];
 
-    // Fetch favourited profiles with token
-    const favRes = await fetch(`/api/users/${userId}/favourites`, { headers });
+    // Get favourites
+    const favRes = await fetch(`/api/users/${userId}/favourites`);
     const favData = await favRes.json();
-    if (Array.isArray(favData)) {
-      favourites.value = favData;
-    }
+    favourites.value = Array.isArray(favData) ? favData : [];
   } catch (err) {
     console.error("Failed to load profiles or user info:", err);
   }
