@@ -43,14 +43,19 @@
     const router = useRouter();
 
     function getCsrfToken() {
-        fetch('https://info3180-project-lof1.onrender.com/api/v1/csrf-token')
-        .then((response) => response.json())
-        .then((data) => {
-            console.log(data);
-            console.log("csrf work");
-            csrf_token.value = data.csrf_token;
-        });
-    }
+    fetch('https://info3180-project-lof1.onrender.com/api/v1/csrf-token', {
+        credentials: 'include'  // <-- ensures session cookie is received
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        console.log("CSRF Token fetched:", data.csrf_token);
+        csrf_token.value = data.csrf_token;
+    })
+    .catch((error) => {
+        console.error("Error fetching CSRF token:", error);
+    });
+}
+
 
     onMounted(() => {
         getCsrfToken();
