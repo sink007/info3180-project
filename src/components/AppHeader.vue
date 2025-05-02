@@ -26,23 +26,14 @@ const isLoggedIn = ref(false);
 const router = useRouter();
 
 onMounted(() => {
-  isLoggedIn.value = sessionStorage.getItem("loggedIn") === "true";
+  isLoggedIn.value = sessionStorage.getItem("token") !== null;
 });
 
 const logoutUser = async () => {
   try {
-    const response = await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include" // Session-based auth remains intact
-    });
-
-    if (response.ok) {
-      isLoggedIn.value = false;
-      sessionStorage.removeItem("loggedIn");
-      router.push("/login");
-    } else {
-      alert("Logout failed.");
-    }
+    sessionStorage.removeItem("token");
+    isLoggedIn.value = false;
+    router.push("/login");
   } catch (error) {
     console.error("Logout error:", error);
   }
