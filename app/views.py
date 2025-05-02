@@ -33,6 +33,7 @@ def get_csrf():
     return jsonify({'csrf_token': generate_csrf()})
 
 @app.route("/api/register",  methods=['POST']) #done
+@csrf.exempt 
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
