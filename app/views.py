@@ -73,19 +73,20 @@ def register():
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        username = form.username.data
-        password = form.password.data
-        user = Users.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password, password):
-            token = jwt.encode({'id': user.id}, app.config['JWT_SECRET_KEY'], algorithm="HS256")
-            return jsonify({
-                "message": "Login successful",
-                "token": token,
-                "username": user.username,
-                "id": user.id
-            }), 200
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+
+    user = Users.query.filter_by(username=username).first()
+    if user and check_password_hash(user.password, password):
+        token = jwt.encode({'id': user.id}, app.config['JWT_SECRET_KEY'], algorithm="HS256")
+        return jsonify({
+            "message": "Login successful",
+            "token": token,
+            "username": user.username,
+            "id": user.id
+        }), 200
+
     return jsonify({"message": "Invalid credentials"}), 401
 
 
