@@ -42,19 +42,39 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 const profiles = ref([]);
 const loading = ref(true);
 const searchTerm = ref('');
 const selectedFilter = ref(null);
+const router = useRouter();
 
 onMounted(async () => {
+  const token = sessionStorage.getItem("token");
+
+  if (!token) {
+    router.push("/login");
+    return;
+  }
+
   try {
-    const response = await fetch('/api/profiles');
-    const data = await response.json();
-    profiles.value = data;
+    const response = await fetch('/api/profiles', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      profiles.value = data;
+    } else {
+      console.error("Unauthorized or error fetching profiles");
+      router.push("/login");
+    }
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching profiles:", error);
+    router.push("/login");
   } finally {
     loading.value = false;
   }
@@ -83,7 +103,6 @@ const filteredProfiles = computed(() => {
     }
   });
 
-  // Limit to the 4 most recent profiles
   return filtered.slice(0, 4);
 });
 </script>
