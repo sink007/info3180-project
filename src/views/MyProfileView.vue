@@ -30,23 +30,22 @@
       </div>
     </div>
 
-    <!-- Favourited Profiles Section -->
     <div class="mt-5" v-if="favourites.length">
-      <h3 class="text-center mb-4">Profiles You Have Favourited</h3>
+      <h3 class="text-center mb-4 text-danger">Profiles You Have Favourited</h3>
       <div class="row justify-content-center">
         <div v-for="profile in favourites" :key="'fav-' + profile.id" class="col-md-4 mb-4">
-          <div class="card h-100 shadow-sm">
+          <div class="card h-100 shadow-sm fav-card">
             <div class="card-body text-center">
               <h5 class="card-title">{{ profile.description }}</h5>
               <p><strong>Parish:</strong> {{ profile.parish }}</p>
               <p><strong>Race:</strong> {{ profile.race }}</p>
-              <RouterLink :to="`/profiles/${profile.id}`" class="btn btn-outline-primary">Show More Details</RouterLink>
+              <RouterLink :to="`/profiles/${profile.id}`" class="btn btn-outline-danger">Show More Details</RouterLink>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+</div>
 </template>
 
 <script setup>
@@ -115,6 +114,32 @@ onMounted(async () => {
 }
 .square-add-btn:hover {
   background-color: #007bff;
+  color: white;
+}
+
+.fav-card {
+  border: 2px dashed #dc3545;
+  background-color: #fff0f3;
+  border-radius: 10px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.fav-card:hover {
+  transform: scale(1.02);
+  background-color: #ffe6ea;
+}
+
+.fav-card .card-body {
+  padding: 1.5rem;
+}
+
+.fav-card .btn {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.fav-card .btn:hover {
+  background-color: #dc3545;
   color: white;
 }
 </style>

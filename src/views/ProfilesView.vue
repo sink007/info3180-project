@@ -2,8 +2,13 @@
   <div class="container mt-4">
     <!-- SEARCH AND FILTER AREA -->
     <div class="search-filters mb-4">
-      <input type="text" class="form-control mb-3" placeholder="Search profiles..." v-model="searchTerm" />
-      <div class="filter-buttons">
+      <input
+        type="text"
+        class="form-control mb-2"
+        placeholder="Search profiles..."
+        v-model="searchTerm"
+      />
+      <div class="filter-buttons mb-2">
         <button
           v-for="filter in ['Name', 'Birth', 'Sex', 'Race']"
           :key="filter"
@@ -12,6 +17,7 @@
         >
           {{ filter }}
         </button>
+        <button v-if="searchTerm" class="clear-btn" @click="clearSearch">Clear</button>
       </div>
     </div>
 
@@ -40,19 +46,19 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 const profiles = ref([]);
 const loading = ref(true);
-const searchTerm = ref('');
+const searchTerm = ref(sessionStorage.getItem("lastSearch") || '');
 const selectedFilter = ref(null);
 const router = useRouter();
 
 onMounted(async () => {
   const token = sessionStorage.getItem("token");
-
   if (!token) {
     router.push("/login");
     return;
@@ -80,8 +86,17 @@ onMounted(async () => {
   }
 });
 
+const clearSearch = () => {
+  searchTerm.value = '';
+  sessionStorage.removeItem("lastSearch");
+};
+
 const filteredProfiles = computed(() => {
-  const term = searchTerm.value.toLowerCase();
+  const term = searchTerm.value.toLowerCase().trim();
+
+  if (term) {
+    sessionStorage.setItem("lastSearch", term);
+  }
 
   const filtered = profiles.value.filter(profile => {
     if (!term) return true;
@@ -90,7 +105,7 @@ const filteredProfiles = computed(() => {
       case 'Name':
         return profile.name.toLowerCase().includes(term);
       case 'Sex':
-        return profile.sex?.trim().toLowerCase() === term.trim().toLowerCase();
+        return profile.sex?.trim().toLowerCase() === term;
       case 'Race':
         return profile.race && profile.race.toLowerCase().includes(term);
       case 'Birth':
@@ -103,9 +118,10 @@ const filteredProfiles = computed(() => {
     }
   });
 
-  return filtered.slice(0, 4);
+  return term ? filtered : filtered.slice(0, 4);
 });
 </script>
+
 
 <style scoped>
 .filter-btn {
@@ -127,6 +143,21 @@ const filteredProfiles = computed(() => {
 .filter-btn.active {
   background-color: #333;
   color: #fff;
+}
+
+.clear-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.clear-btn:hover {
+  background-color: #495057;
 }
 
 .card-img-top {

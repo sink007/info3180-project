@@ -4,11 +4,10 @@
 
     <div v-else-if="profile" class="card shadow p-4" style="border-radius: 15px;">
       <div class="text-center mb-3">
-        <img 
-          :src="`/uploads/${profile.photo}`" 
-          alt="Profile Photo" 
-          class="img-fluid mb-3" 
-          style="max-width: 150px; border-radius: 25%;" 
+        <img
+          :src="getProfilePhoto(profile?.photo)"
+          class="profile-pic mb-3"
+          alt="Profile Photo"
         />
         <h4 class="mt-2">{{ profile.name }}</h4>
       </div>
@@ -133,6 +132,12 @@ function emailUser() {
   } else {
     alert("Email not available for this user.");
   }
+}
+
+
+function getProfilePhoto(filename) {
+  if (!filename) return '/uploads/default-user.jpeg';
+  return `/uploads/${filename}`;
 }
 </script>
 
