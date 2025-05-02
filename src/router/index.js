@@ -9,7 +9,7 @@ import ProfileDetailView from '../views/ProfileDetailView.vue';
 import FavouritesView from '../views/FavouritesView.vue';
 import MyProfileView from '../views/MyProfileView.vue';
 import CreateProfileView from '../views/CreateProfileView.vue';
-import MatchView from '../views/MatchView.vue';
+import MatchesView from '../views/MatchesView.vue';
 
 const routes = [
   { path: '/', name: 'home', component: HomeView },
@@ -20,7 +20,7 @@ const routes = [
   { path: '/profiles', name: 'profiles', component: ProfilesView },
   { path: '/profiles/:id', name: 'profile-detail', component: ProfileDetailView },
   { path: '/favourites', name: 'favourites', component: FavouritesView },
-  { path: '/profiles/matches/:id', name: 'matches', component: MatchView },
+  { path: '/profiles/matches/:id', name: 'matches', component: MatchesView },
   { path: '/my-profile', name: 'my-profile', component: MyProfileView },
   { path: '/profiles/new', name: 'new-profile', component: CreateProfileView }
 ];
