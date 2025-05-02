@@ -39,17 +39,7 @@
     const name = ref('');
     const email = ref('');
     const photo = ref(null);
-    let csrf_token = ref('');
     const router = useRouter();
-
-    function getCsrfToken() {
-        fetch('/api/v1/csrf-token')
-        .then((response) => response.json())
-        .then((data) => {
-            console.log(data);
-            csrf_token.value = data.csrf_token;
-        });
-    }
 
     onMounted(() => {
         getCsrfToken();
@@ -67,21 +57,19 @@
         form_data.append('name', name.value);
         form_data.append('email', email.value);
         form_data.append('photo', photo.value);
-        console.log(form_data);
+
         try {
             let response = await fetch('/api/register', {
                 method: 'POST',
                 body: form_data,
-                headers: {
-                'X-CSRFToken': csrf_token.value,
-                },
-                
             });
 
             let data = await response.json();
-            if (response.ok){
+            if (response.ok) {
+                alert(data.message);
                 router.push({ name: 'home' });
-                alert(data.message)
+            } else {
+                alert("Registration failed.");
                 console.log(data);
             }
         } catch (error) {

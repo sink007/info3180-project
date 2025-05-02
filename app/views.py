@@ -5,6 +5,7 @@ from app import app, db
 from flask import request, jsonify, url_for
 from werkzeug.utils import secure_filename
 from datetime import datetime
+from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 import jwt
 from functools import wraps
@@ -38,7 +39,7 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         username = form.username.data
-        password = form.password.data
+        password = generate_password_hash(form.password.data)
         name = form.name.data
         email = form.email.data
         photo = form.photo.data
