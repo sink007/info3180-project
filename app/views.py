@@ -3,10 +3,10 @@ from app.models import Users, Profile, Favourite
 import os
 from app import app, db
 from flask import request, jsonify, url_for
-from werkzeug.utils import secure_filename
+from flask import send_from_directory, render_template
 from datetime import datetime
-from werkzeug.security import generate_password_hash
-from werkzeug.security import check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import jwt
 from functools import wraps
 
@@ -387,10 +387,6 @@ def top_favourited_users(N):
 
 
 @app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(os.path.join(os.getcwd(), 'uploads'), filename)
-
-@app.route('/uploads/<filename>')
 def get_image(filename):
     try:
         safe_name = secure_filename(filename)
@@ -401,7 +397,6 @@ def get_image(filename):
             return jsonify({"error": "File not found"}), 404
 
         return send_from_directory(app.config['UPLOAD_FOLDER'], safe_name)
-
     except Exception as e:
         print("Image loading error:", e)
         return jsonify({"error": "Server error"}), 500
