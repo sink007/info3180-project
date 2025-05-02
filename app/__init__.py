@@ -4,13 +4,18 @@ from flask_sqlalchemy import SQLAlchemy
 from .config import Config
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
-from flask_cors import CORS  # <-- NEW
+from flask_cors import CORS
 
 app = Flask(__name__)
+
+# 🔐 Allow secure cookies for cross-site frontend/backend
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+app.config['SESSION_COOKIE_SECURE'] = True
+
 csrf = CSRFProtect()
 csrf.init_app(app)
 
-# CORS setup for frontend hosted on Render
+# Allow CORS with cookies for your frontend
 CORS(app, origins=["https://info3180-project-1.onrender.com"], supports_credentials=True)
 
 app.config.from_object(Config)
