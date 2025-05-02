@@ -32,50 +32,47 @@
 </template>
 
 <script setup>
-    import { ref, onMounted } from 'vue';
-    import { useRouter } from 'vue-router'; 
-    const username = ref('');
-    const password = ref('');
-    const name = ref('');
-    const email = ref('');
-    const photo = ref(null);
-    const router = useRouter();
+import { ref } from 'vue';
+import { useRouter } from 'vue-router'; 
 
-    onMounted(() => {
-        getCsrfToken();
-    });
+const username = ref('');
+const password = ref('');
+const name = ref('');
+const email = ref('');
+const photo = ref(null);
+const router = useRouter();
 
-    const handleFileUpload = (event) => {
-        photo.value = event.target.files[0];
-    };
+const handleFileUpload = (event) => {
+    photo.value = event.target.files[0];
+};
 
-    const registerUser = async () => {
-        let registerForm = document.getElementById('registerForm');
-        let form_data = new FormData(registerForm);
-        form_data.append('username', username.value);
-        form_data.append('password', password.value);
-        form_data.append('name', name.value);
-        form_data.append('email', email.value);
-        form_data.append('photo', photo.value);
+const registerUser = async () => {
+    let registerForm = document.getElementById('registerForm');
+    let form_data = new FormData(registerForm);
+    form_data.append('username', username.value);
+    form_data.append('password', password.value);
+    form_data.append('name', name.value);
+    form_data.append('email', email.value);
+    form_data.append('photo', photo.value);
 
-        try {
-            let response = await fetch('/api/register', {
-                method: 'POST',
-                body: form_data,
-            });
+    try {
+        let response = await fetch('/api/register', {
+            method: 'POST',
+            body: form_data,
+        });
 
-            let data = await response.json();
-            if (response.ok) {
-                alert(data.message);
-                router.push({ name: 'home' });
-            } else {
-                alert("Registration failed.");
-                console.log(data);
-            }
-        } catch (error) {
-            console.error('Error:', error);
+        let data = await response.json();
+        if (response.ok) {
+            alert(data.message);
+            router.push({ name: 'home' });
+        } else {
+            alert("Registration failed.");
+            console.log(data);
         }
-    };
+    } catch (error) {
+        console.error('Error:', error);
+    }
+};
 </script>
 
 <style scoped>
