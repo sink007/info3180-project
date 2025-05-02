@@ -1,38 +1,50 @@
+<template>
+  <header>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <nav class="navbar">
+      <div class="container-fluid d-flex justify-content-between align-items-center w-100">
+        
+        <!-- Left: Jam Date logo -->
+        <a class="navbar-brand handwritten" href="/">Jam Date</a>
+
+        <!-- Right: Show Report + Logout if logged in -->
+        <div class="d-flex align-items-center gap-3">
+          <RouterLink v-if="loggedIn" to="/my-profile" class="nav-link">My Profile</RouterLink>
+          <RouterLink to="/report" class="nav-link report-link">View Report</RouterLink>
+          <button v-if="loggedIn" class="btn btn-link logout-btn" @click="logoutUser">Logout</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+</template>
+
 <script setup>
 import { RouterLink, useRouter } from "vue-router";
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted } from "vue";
 
-const isLoggedIn = ref(false);
+const loggedIn = ref(false);
 const router = useRouter();
 
-const checkLoginStatus = () => {
-  isLoggedIn.value = sessionStorage.getItem("token") !== null;
-};
+function checkAuth() {
+  loggedIn.value = sessionStorage.getItem("token") !== null;
+}
 
 onMounted(() => {
-  checkLoginStatus();
-  window.addEventListener("storage", checkLoginStatus);
+  checkAuth();
+  window.addEventListener("storage", checkAuth); // Listen to changes in sessionStorage
 });
 
-onBeforeUnmount(() => {
-  window.removeEventListener("storage", checkLoginStatus);
-});
-
-const logoutUser = async () => {
-  try {
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("userId");
-    isLoggedIn.value = false;
-    router.push("/login");
-  } catch (error) {
-    console.error("Logout error:", error);
-  }
+const logoutUser = () => {
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("userId");
+  loggedIn.value = false;
+  router.push("/login");
 };
 </script>
 
 <style scoped>
 .navbar {
-  background-color: #111827; /* dark navy */
+  background-color: #111827;
   color: white;
   position: fixed;
   top: 0;
@@ -47,11 +59,6 @@ const logoutUser = async () => {
   font-weight: 500;
   color: white;
   text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.navbar-brand:hover {
-  color: #00ffc8;
 }
 
 .handwritten {
@@ -66,13 +73,9 @@ const logoutUser = async () => {
   transition: color 0.2s ease;
 }
 
-.nav-link:hover {
+.report-link:hover {
   color: #00ffc8;
   text-decoration: underline;
-}
-
-.report-link {
-  margin-right: 10px;
 }
 
 .logout-btn {
@@ -81,12 +84,7 @@ const logoutUser = async () => {
   color: #ddd;
   font-weight: 500;
   cursor: pointer;
-  font-size: 0.95rem;
-  transition: color 0.2s ease;
-}
-
-.logout-btn:hover {
-  color: #ff5e5e;
   text-decoration: underline;
+  font-size: 0.95rem;
 }
 </style>
