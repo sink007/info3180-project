@@ -1,42 +1,35 @@
-"""
-Flask Documentation:     https://flask.palletsprojects.com/
-Jinja2 Documentation:    https://jinja.palletsprojects.com/
-Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
-This file creates your application.
-"""
-
-from app.forms import RegisterForm, LoginForm, ProfileForm, SearchForm
-from app.models import Users,Profile,Favourite
+from app.forms import RegisterForm, LoginForm, ProfileForm
+from app.models import Users, Profile, Favourite
 import os
-from app import app, db, login_manager
-from flask import render_template, request,  jsonify, send_file, redirect, url_for, flash, session, abort, send_from_directory
-from flask_login import login_user, logout_user, current_user, login_required
+from app import app, db
+from flask import request, jsonify, url_for
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from flask_wtf.csrf import generate_csrf
 from werkzeug.security import check_password_hash
-from flask_wtf import csrf
-from app import csrf
-from sqlalchemy import func, case
-###
+import jwt
+from functools import wraps
 
-###
-# Routing for your application.
-###
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split(" ")[1]
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+        try:
+            data = jwt.decode(token, app.config['JWT_SECRET_KEY'], algorithms=["HS256"])
+            current_user = Users.query.get(data['id'])
+        except:
+            return jsonify({'message': 'Token is invalid!'}), 401
+        return f(current_user, *args, **kwargs)
+    return decorated
 
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
 
-@app.route('/assets/<path:filename>')
-def assets(filename):
-  return app.send_static_file(os.path.join('assets', filename))
-
-@app.route('/api/v1/csrf-token', methods=['GET'])
-def get_csrf():
-    return jsonify({'csrf_token': generate_csrf()})
-
-@app.route("/api/register",  methods=['POST']) #done
+@app.route('/api/register', methods=['POST'])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
@@ -50,12 +43,12 @@ def register():
         photo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
         new_user = Users(
-            username = username,
-            password = password,
-            name = name,
-            email = email,
-            photo = filename,
-            date_joined = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            username=username,
+            password=password,
+            name=name,
+            email=email,
+            photo=filename,
+            date_joined=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         )
 
         db.session.add(new_user)
@@ -63,43 +56,36 @@ def register():
         return jsonify({
             "message": "User Successfully added",
             "username": new_user.username,
-            "password": new_user.password,
             "name": new_user.name,
-            "email": new_user.email,
-            "photo": new_user.photo,
-            "date_joined": new_user.date_joined
+            "email": new_user.email
         })
 
-    else:
-        return form_errors(form)
+    return jsonify({"message": "Invalid form input"}), 400
 
-@app.route('/api/auth/login', methods=['POST', 'GET']) #done
+@app.route('/api/auth/login', methods=['POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
         user = Users.query.filter_by(username=username).first()
-
         if user and check_password_hash(user.password, password):
-            login_user(user)
+            token = jwt.encode({'id': user.id}, app.config['JWT_SECRET_KEY'], algorithm="HS256")
             return jsonify({
                 "message": "Login successful",
+                "token": token,
                 "username": user.username,
                 "id": user.id
             }), 200
-        else:
-            return jsonify({"message": "Invalid credentials"}), 401
+    return jsonify({"message": "Invalid credentials"}), 401
 
-@app.route('/api/auth/logout', methods=['POST'])  #undone
-@login_required
+@app.route('/api/auth/logout', methods=['POST'])
 def logout():
-    logout_user()
-    return jsonify({"message": "Logged out successfully."}), 200
+    return jsonify({"message": "Logout successful"}), 200
 
-@app.route('/api/profiles', methods=['GET', 'POST']) #done
-@login_required
-def profiles():
+@app.route('/api/profiles', methods=['GET', 'POST'])
+@token_required
+def profiles(current_user):
     if request.method == 'GET':
         profiles = Profile.query.order_by(Profile.id.desc()).all()
         results = []
@@ -125,17 +111,12 @@ def profiles():
                 "family_oriented": p.family_oriented,
                 "fav_count": p.fav_count
             })
-
         return jsonify(results)
 
     elif request.method == 'POST':
-        if not current_user.is_authenticated:
-            return jsonify({"error": "Unauthorized"}), 401
-
-        # Check how many profiles this user already has
         profile_count = Profile.query.filter_by(user_id_fk=current_user.id).count()
         if profile_count >= 3:
-            return jsonify({"message": "Profile limit reached. You can only create up to 3 profiles."}), 403
+            return jsonify({"message": "Profile limit reached"}), 403
 
         form = ProfileForm()
         if form.validate_on_submit():
@@ -159,7 +140,8 @@ def profiles():
             db.session.commit()
             return jsonify({"message": "Profile added successfully"}), 201
 
-        return form_errors(form)
+        return jsonify({"message": "Invalid form input"}), 400
+        
 
 @app.route('/api/profiles/<profile_id>', methods=['GET'])#done
 def get_profile(profile_id):
@@ -192,8 +174,8 @@ def get_profile(profile_id):
 
 
 @app.route('/api/profiles/<int:user_id>/favourite', methods=['POST'])
-@login_required
-def favourite_user(user_id):
+@token_required
+def favourite_user(current_user, user_id):
     profile = Profile.query.get(user_id)
     if profile.user_id_fk == current_user.id:
         return jsonify({"message": "You cannot favourite yourself."}), 400
@@ -203,26 +185,19 @@ def favourite_user(user_id):
 
     fav = Favourite(user_id_fk=current_user.id, fav_user_id_fk=user_id)
     db.session.add(fav)
-
     profile.fav_count += 1  
     db.session.commit()  
     return jsonify({"message": "User added to favourites."})
 
-
-@app.route('/api/profiles/<profile_id>/is-favourited', methods=['GET'])#done
-@login_required
-def is_favourited(profile_id):
-    # Check if the current user has already favourited this profile
+@app.route('/api/profiles/<profile_id>/is-favourited', methods=['GET'])
+@token_required
+def is_favourited(current_user, profile_id):
     fav = Favourite.query.filter_by(user_id_fk=current_user.id, fav_user_id_fk=profile_id).first()
-
-    if fav:
-        return jsonify({"isFavourited": True})
-    else:
-        return jsonify({"isFavourited": False})
+    return jsonify({"isFavourited": bool(fav)})
 
 @app.route('/api/profiles/matches/<profile_id>', methods=['GET'])
-@login_required
-def get_profile_matches(profile_id):
+@token_required
+def get_profile_matches(current_user, profile_id):
     try:
         base = Profile.query.get_or_404(profile_id)
         match_score = (
