@@ -96,60 +96,80 @@ def logout():
 @token_required
 def profiles(current_user):
     if request.method == 'GET':
-        profiles = Profile.query.order_by(Profile.id.desc()).all()
-        results = []
-        for p in profiles:
-            user = Users.query.get(p.user_id_fk)
-            results.append({
-                "id": p.id,
-                "user_id": p.user_id_fk,
-                "name": user.name,
-                "photo": url_for('get_image', filename=user.photo, _external=True),
-                "description": p.description,
-                "parish": p.parish,
-                "biography": p.biography,
-                "sex": p.sex,
-                "race": p.race,
-                "birth_year": p.birth_year,
-                "height": p.height,
-                "fav_cuisine": p.fav_cuisine,
-                "fav_colour": p.fav_colour,
-                "fav_school_subject": p.fav_school_subject,
-                "political": p.political,
-                "religious": p.religious,
-                "family_oriented": p.family_oriented,
-                "fav_count": p.fav_count
-            })
-        return jsonify(results)
+        try:
+            profiles = Profile.query.order_by(Profile.id.desc()).all()
+            results = []
+
+            for p in profiles:
+                user = Users.query.get(p.user_id_fk)
+                if not user:
+                    continue 
+
+                photo_url = (
+                    url_for('get_image', filename=user.photo, _external=True)
+                    if user.photo else None
+                )
+
+                results.append({
+                    "id": p.id,
+                    "user_id": p.user_id_fk,
+                    "name": user.name,
+                    "photo": photo_url,
+                    "description": p.description,
+                    "parish": p.parish,
+                    "biography": p.biography,
+                    "sex": p.sex,
+                    "race": p.race,
+                    "birth_year": p.birth_year,
+                    "height": p.height,
+                    "fav_cuisine": p.fav_cuisine,
+                    "fav_colour": p.fav_colour,
+                    "fav_school_subject": p.fav_school_subject,
+                    "political": p.political,
+                    "religious": p.religious,
+                    "family_oriented": p.family_oriented,
+                    "fav_count": p.fav_count
+                })
+
+            return jsonify(results), 200
+
+        except Exception as e:
+            print("GET /api/profiles error:", e)
+            return jsonify({"error": "Internal Server Error"}), 500
 
     elif request.method == 'POST':
-        profile_count = Profile.query.filter_by(user_id_fk=current_user.id).count()
-        if profile_count >= 3:
-            return jsonify({"message": "Profile limit reached"}), 403
+        try:
+            profile_count = Profile.query.filter_by(user_id_fk=current_user.id).count()
+            if profile_count >= 3:
+                return jsonify({"message": "Profile limit reached"}), 403
 
-        form = ProfileForm()
-        if form.validate_on_submit():
-            new_profile = Profile(
-                user_id_fk=current_user.id,
-                description=form.description.data,
-                parish=form.parish.data,
-                biography=form.biography.data,
-                sex=form.sex.data,
-                race=form.race.data,
-                birth_year=form.birth_year.data,
-                height=form.height.data,
-                fav_cuisine=form.fav_cuisine.data,
-                fav_colour=form.fav_colour.data,
-                fav_school_subject=form.fav_school_subject.data,
-                political=form.political.data,
-                religious=form.religious.data,
-                family_oriented=form.family_oriented.data,
-            )
-            db.session.add(new_profile)
-            db.session.commit()
-            return jsonify({"message": "Profile added successfully"}), 201
+            form = ProfileForm()
+            if form.validate_on_submit():
+                new_profile = Profile(
+                    user_id_fk=current_user.id,
+                    description=form.description.data,
+                    parish=form.parish.data,
+                    biography=form.biography.data,
+                    sex=form.sex.data,
+                    race=form.race.data,
+                    birth_year=form.birth_year.data,
+                    height=form.height.data,
+                    fav_cuisine=form.fav_cuisine.data,
+                    fav_colour=form.fav_colour.data,
+                    fav_school_subject=form.fav_school_subject.data,
+                    political=form.political.data,
+                    religious=form.religious.data,
+                    family_oriented=form.family_oriented.data,
+                )
+                db.session.add(new_profile)
+                db.session.commit()
+                return jsonify({"message": "Profile added successfully"}), 201
 
-        return jsonify({"message": "Invalid form input"}), 400
+            return jsonify({"message": "Invalid form input"}), 400
+
+        except Exception as e:
+            print("POST /api/profiles error:", e)
+            return jsonify({"error": "Internal Server Error"}), 500
         
 
 @app.route('/api/profiles/<profile_id>', methods=['GET'])#done
@@ -369,7 +389,14 @@ def uploaded_file(filename):
 
 @app.route('/uploads/<filename>')
 def get_image(filename):
-    return send_from_directory('uploads', filename)
+    try:
+        path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename))
+        if not os.path.exists(path):
+            return jsonify({"error": "File not found"}), 404
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    except Exception as e:
+        print("Image loading error:", e)
+        return jsonify({"error": "Server error"}), 500
 
 
 ###
