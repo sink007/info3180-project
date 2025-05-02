@@ -106,11 +106,14 @@ def profiles(current_user):
                     print(f"Skipping profile {p.id}, user {p.user_id_fk} not found")
                     continue
 
-                # Check if the image file actually exists
-                photo_path = os.path.join(app.config['UPLOAD_FOLDER'], user.photo) if user.photo else None
+                # Fallback image if user's image is missing or file not found
+                filename = user.photo if user.photo else 'default-user.jpeg'
+                photo_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
                 photo_url = (
-                    url_for('get_image', filename=user.photo, _external=True)
-                    if user.photo and os.path.exists(photo_path) else None
+                    url_for('get_image', filename=filename, _external=True)
+                    if os.path.exists(photo_path)
+                    else url_for('get_image', filename='default-user.jpeg', _external=True)
                 )
 
                 results.append({
