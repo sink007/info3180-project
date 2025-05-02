@@ -3,9 +3,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <nav class="navbar">
       <div class="container-fluid d-flex justify-content-between align-items-center w-100">
-        
+
         <!-- Left: Jam Date logo -->
-        <a class="navbar-brand handwritten" href="/">Jam Date</a>
+        <RouterLink class="navbar-brand handwritten" to="/">Jam Date</RouterLink>
 
         <!-- Right: Show Report + Logout if logged in -->
         <div class="d-flex align-items-center gap-3">
@@ -19,8 +19,9 @@
 </template>
 
 <script setup>
+
 import { RouterLink, useRouter } from "vue-router";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 
 const loggedIn = ref(false);
 const router = useRouter();
@@ -31,7 +32,11 @@ function checkAuth() {
 
 onMounted(() => {
   checkAuth();
-  window.addEventListener("storage", checkAuth); // Listen to changes in sessionStorage
+  window.addEventListener("storage", checkAuth);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("storage", checkAuth);
 });
 
 const logoutUser = () => {
@@ -41,6 +46,7 @@ const logoutUser = () => {
   router.push("/login");
 };
 </script>
+
 
 <style scoped>
 .navbar {
