@@ -36,36 +36,39 @@ def serve_assets(filename):
 
 @app.route('/api/register', methods=['POST'])
 def register():
-    form = RegisterForm()
-    if form.validate_on_submit():
-        username = form.username.data
-        password = generate_password_hash(form.password.data)
-        name = form.name.data
-        email = form.email.data
-        photo = form.photo.data
+    username = request.form.get('username')
+    password = request.form.get('password')
+    name = request.form.get('name')
+    email = request.form.get('email')
+    photo = request.files.get('photo')
 
-        filename = secure_filename(photo.filename)
-        photo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+    if not all([username, password, name, email, photo]):
+        return jsonify({"message": "Missing required fields"}), 400
 
-        new_user = Users(
-            username=username,
-            password=password,
-            name=name,
-            email=email,
-            photo=filename,
-            date_joined=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        )
+    filename = secure_filename(photo.filename)
+    photo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
-        db.session.add(new_user)
-        db.session.commit()
-        return jsonify({
-            "message": "User Successfully added",
-            "username": new_user.username,
-            "name": new_user.name,
-            "email": new_user.email
-        })
+    hashed_password = generate_password_hash(password)
 
-    return jsonify({"message": "Invalid form input"}), 400
+    new_user = Users(
+        username=username,
+        password=hashed_password,
+        name=name,
+        email=email,
+        photo=filename,
+        date_joined=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    )
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({
+        "message": "User Successfully added",
+        "username": new_user.username,
+        "name": new_user.name,
+        "email": new_user.email
+    }), 201
+
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
