@@ -87,6 +87,7 @@ def login():
             }), 200
     return jsonify({"message": "Invalid credentials"}), 401
 
+
 @app.route('/api/auth/logout', methods=['POST'])
 def logout():
     return jsonify({"message": "Logout successful"}), 200

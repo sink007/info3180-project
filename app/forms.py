@@ -33,5 +33,7 @@ class SearchForm(FlaskForm):
     race = StringField('Race', validators=[Optional()])
 
 class LoginForm(FlaskForm):
+    class Meta:
+        csrf = False
     username = StringField('Username', validators=[InputRequired()])
     password = PasswordField('Password', validators=[InputRequired()])
