@@ -47,18 +47,42 @@ const profiles = ref([]);
 const loading = ref(true);
 const searchTerm = ref('');
 const selectedFilter = ref(null);
+const csrfToken = ref('');
+
+// Fetch CSRF token from the backend
+const getCsrfToken = async () => {
+  try {
+    const response = await fetch('https://info3180-project-lof1.onrender.com/api/v1/csrf-token', { credentials: 'include' });
+    const data = await response.json();
+    csrfToken.value = data.csrf_token;
+  } catch (error) {
+    console.error('Failed to fetch CSRF token:', error);
+  }
+};
 
 onMounted(async () => {
+  await getCsrfToken();  // Fetch the CSRF token when the component is mounted
+  await fetchProfiles();  // Fetch profiles after getting the CSRF token
+});
+
+// Fetch profiles with CSRF token included in the request headers
+const fetchProfiles = async () => {
   try {
-    const response = await fetch('https://info3180-project-lof1.onrender.com/api/profiles');
+    const response = await fetch('https://info3180-project-lof1.onrender.com/api/profiles', {
+      method: 'GET',
+      headers: {
+        'X-CSRFToken': csrfToken.value,  // Include CSRF token in the request headers
+      },
+      credentials: 'include',  // Include credentials (cookies) with the request
+    });
     const data = await response.json();
     profiles.value = data;
   } catch (error) {
-    console.error(error);
+    console.error('Failed to fetch profiles:', error);
   } finally {
     loading.value = false;
   }
-});
+};
 
 const filteredProfiles = computed(() => {
   const term = searchTerm.value.toLowerCase();
