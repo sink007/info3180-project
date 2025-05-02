@@ -103,11 +103,14 @@ def profiles(current_user):
             for p in profiles:
                 user = Users.query.get(p.user_id_fk)
                 if not user:
-                    continue 
+                    print(f"Skipping profile {p.id}, user {p.user_id_fk} not found")
+                    continue
 
+                # Check if the image file actually exists
+                photo_path = os.path.join(app.config['UPLOAD_FOLDER'], user.photo) if user.photo else None
                 photo_url = (
                     url_for('get_image', filename=user.photo, _external=True)
-                    if user.photo else None
+                    if user.photo and os.path.exists(photo_path) else None
                 )
 
                 results.append({
@@ -390,10 +393,15 @@ def uploaded_file(filename):
 @app.route('/uploads/<filename>')
 def get_image(filename):
     try:
-        path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename))
-        if not os.path.exists(path):
+        safe_name = secure_filename(filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_name)
+
+        if not os.path.exists(file_path):
+            print(f"Image not found: {safe_name}")
             return jsonify({"error": "File not found"}), 404
-        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+        return send_from_directory(app.config['UPLOAD_FOLDER'], safe_name)
+
     except Exception as e:
         print("Image loading error:", e)
         return jsonify({"error": "Server error"}), 500
