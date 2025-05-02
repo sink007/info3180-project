@@ -12,10 +12,13 @@ export default defineConfig({
   server: {
     proxy: {
       '^/api/.*': {
-        target: 'https://info3180-project-lof1.onrender.com', 
+        target: 'http://127.0.0.1:8080', 
         changeOrigin: true,
         rewrite: (path) => path, 
       }
     }
+  },build: {
+    outDir: 'app/static',
+    emptyOutDir: true
   }
 });

@@ -75,7 +75,7 @@ let csrf_token = ref('');
 
 // Get CSRF token
 function getCsrfToken() {
-  fetch('https://info3180-project-lof1.onrender.com/api/v1/csrf-token')
+  fetch('/api/v1/csrf-token')
     .then((response) => response.json())
     .then((data) => {
       csrf_token.value = data.csrf_token;
@@ -89,13 +89,13 @@ onMounted(() => {
 onMounted(async () => {
   try {
     console.log(route.params.id);
-    const response = await fetch(`https://info3180-project-lof1.onrender.com/api/profiles/${route.params.id}`);
+    const response = await fetch(`/api/profiles/${route.params.id}`);
     profile.value = await response.json();
     console.log(profile.value.fav_count)
     console.log(profile.value);
 
     // Check if the profile is already favourited
-    const favResponse = await fetch(`https://info3180-project-lof1.onrender.com/api/profiles/${profile.value.id}/is-favourited`);
+    const favResponse = await fetch(`/api/profiles/${profile.value.id}/is-favourited`);
     const favData = await favResponse.json();
     if (favData.isFavourited === true) {
       isFavourited.value = true;

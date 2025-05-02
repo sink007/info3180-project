@@ -43,19 +43,13 @@
     const router = useRouter();
 
     function getCsrfToken() {
-    fetch('https://info3180-project-lof1.onrender.com/api/v1/csrf-token', {
-        credentials: 'include'  // <-- ensures session cookie is received
-    })
-    .then((response) => response.json())
-    .then((data) => {
-        console.log("CSRF Token fetched:", data.csrf_token);
-        csrf_token.value = data.csrf_token;
-    })
-    .catch((error) => {
-        console.error("Error fetching CSRF token:", error);
-    });
-}
-
+        fetch('/api/v1/csrf-token')
+        .then((response) => response.json())
+        .then((data) => {
+            console.log(data);
+            csrf_token.value = data.csrf_token;
+        });
+    }
 
     onMounted(() => {
         getCsrfToken();
@@ -66,40 +60,34 @@
     };
 
     const registerUser = async () => {
-    let registerForm = document.getElementById('registerForm');
-    let form_data = new FormData(registerForm);
-    form_data.append('username', username.value);
-    form_data.append('password', password.value);
-    form_data.append('name', name.value);
-    form_data.append('email', email.value);
-    form_data.append('photo', photo.value);
-
-    try {
-        const response = await fetch('https://info3180-project-lof1.onrender.com/api/register', {
-            method: 'POST',
-            body: form_data,
-            headers: {
+        let registerForm = document.getElementById('registerForm');
+        let form_data = new FormData(registerForm);
+        form_data.append('username', username.value);
+        form_data.append('password', password.value);
+        form_data.append('name', name.value);
+        form_data.append('email', email.value);
+        form_data.append('photo', photo.value);
+        console.log(form_data);
+        try {
+            let response = await fetch('/api/register', {
+                method: 'POST',
+                body: form_data,
+                headers: {
                 'X-CSRFToken': csrf_token.value,
-            },
-            credentials: 'include' // <-- This is crucial
-        });
+                },
+                
+            });
 
-        const text = await response.text();  // Don't try to parse as JSON yet
-        console.log("Raw server response:", text);
-
-        if (response.ok) {
-            const data = JSON.parse(text);  // Now parse JSON safely
-            alert(data.message);
-            router.push({ name: 'home' });
-        } else {
-            console.error("Server returned an error:", text);
-            alert("Registration failed. See console for details.");
+            let data = await response.json();
+            if (response.ok){
+                router.push({ name: 'home' });
+                alert(data.message)
+                console.log(data);
+            }
+        } catch (error) {
+            console.error('Error:', error);
         }
-    } catch (error) {
-        console.log("Request failed:");
-        console.error('Error:', error);
-    }
-};
+    };
 </script>
 
 <style scoped>

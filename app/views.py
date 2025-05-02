@@ -26,14 +26,17 @@ from sqlalchemy import func, case
 
 @app.route('/')
 def index():
-    return jsonify(message="This is the beginning of our API")
+    return app.send_static_file('index.html')
+
+@app.route('/assets/<path:filename>')
+def assets(filename):
+  return app.send_static_file(os.path.join('assets', filename))
 
 @app.route('/api/v1/csrf-token', methods=['GET'])
 def get_csrf():
     return jsonify({'csrf_token': generate_csrf()})
 
 @app.route("/api/register",  methods=['POST']) #done
-@csrf.exempt 
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
@@ -95,6 +98,7 @@ def logout():
     return jsonify({"message": "Logged out successfully."}), 200
 
 @app.route('/api/profiles', methods=['GET', 'POST']) #done
+@login_required
 def profiles():
     if request.method == 'GET':
         profiles = Profile.query.order_by(Profile.id.desc()).all()

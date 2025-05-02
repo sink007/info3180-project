@@ -26,7 +26,7 @@
   
   onMounted(async () => {
     try {
-      const response = await fetch(`https://info3180-project-lof1.onrender.com/api/users/${sessionStorage.getItem('userId')}/favourites`);
+      const response = await fetch(`/api/users/${sessionStorage.getItem('userId')}/favourites`);
       const data = await response.json();
       favourites.value = data;
     } catch (error) {

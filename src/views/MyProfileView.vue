@@ -68,7 +68,7 @@ onMounted(async () => {
   if (!userId) return router.push('/login');
 
   try {
-    const userRes = await fetch(`https://info3180-project-lof1.onrender.com/api/users/${userId}`);
+    const userRes = await fetch(`/api/users/${userId}`);
     const user = await userRes.json();
     username.value = user.name;
     userPhoto.value = `/uploads/${user.photo}`;
