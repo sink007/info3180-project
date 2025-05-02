@@ -25,6 +25,8 @@ const routes = [
 
   { path: '/my-profile', name: 'my-profile', component: MyProfileView },
   { path: '/profiles/new', name: 'new-profile', component: CreateProfileView }, 
+  
+  {path: '/profiles/matches/:id', name: 'MatchView', component: () => import('@/views/MatchView.vue')}
 ];
 
 const router = createRouter({
