@@ -32,7 +32,7 @@ const logoutUser = async () => {
 
 <style scoped>
 .navbar {
-  background-color: #111827; /* solid dark navy (tailwind vibes) */
+  background-color: #111827; /* dark navy */
   color: white;
   position: fixed;
   top: 0;
@@ -47,6 +47,11 @@ const logoutUser = async () => {
   font-weight: 500;
   color: white;
   text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.navbar-brand:hover {
+  color: #00ffc8;
 }
 
 .handwritten {
@@ -61,9 +66,13 @@ const logoutUser = async () => {
   transition: color 0.2s ease;
 }
 
-.report-link:hover {
+.nav-link:hover {
   color: #00ffc8;
   text-decoration: underline;
+}
+
+.report-link {
+  margin-right: 10px;
 }
 
 .logout-btn {
@@ -72,7 +81,12 @@ const logoutUser = async () => {
   color: #ddd;
   font-weight: 500;
   cursor: pointer;
-  text-decoration: underline;
   font-size: 0.95rem;
+  transition: color 0.2s ease;
+}
+
+.logout-btn:hover {
+  color: #ff5e5e;
+  text-decoration: underline;
 }
 </style>
