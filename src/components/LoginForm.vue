@@ -45,7 +45,15 @@ const loginUser = async () => {
       const data = await response.json();
       sessionStorage.setItem("token", data.token);
       sessionStorage.setItem("userId", data.id);
-      window.location.href = "/profiles";
+      
+
+      console.log("Token at login:", sessionStorage.getItem("token"));
+
+      setTimeout(() => {
+        window.location.href = "/profiles";
+      }, 500);
+
+
     } else {
       const errorData = await response.json();
       console.error("Login failed:", errorData);
