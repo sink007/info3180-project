@@ -45,14 +45,12 @@ const loginUser = async () => {
       const data = await response.json();
       sessionStorage.setItem("token", data.token);
       sessionStorage.setItem("userId", data.id);
-      
 
       console.log("Token at login:", sessionStorage.getItem("token"));
 
       setTimeout(() => {
-        window.location.href = "/profiles";
+        router.push('/profiles');
       }, 500);
-
 
     } else {
       const errorData = await response.json();
