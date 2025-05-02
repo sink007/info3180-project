@@ -60,29 +60,38 @@ const router = useRouter();
 const favourites = ref([]);
 
 const goToMatches = (profileId) => {
-  router.push('/matches');
+  router.push(`/profiles/matches/${profileId}`);
 };
 
 onMounted(async () => {
   const userId = sessionStorage.getItem("userId");
-  if (!userId) return router.push('/login');
+  const token = sessionStorage.getItem("token");
+
+  if (!userId || !token) {
+    return router.push('/login');
+  }
+
+  const headers = {
+    "Authorization": `Bearer ${token}`
+  };
 
   try {
+    // Fetch user info (no token needed)
     const userRes = await fetch(`/api/users/${userId}`);
     const user = await userRes.json();
     username.value = user.name;
     userPhoto.value = `/uploads/${user.photo}`;
 
-    const response = await fetch(`/api/profiles`);
+    // Fetch own profiles with token
+    const response = await fetch(`/api/profiles`, { headers });
     const data = await response.json();
     profiles.value = data.filter(p => p.user_id === parseInt(userId));
 
-    // Fetch favourited profiles
-    const favRes = await fetch(`/api/users/${userId}/favourites`);
+    // Fetch favourited profiles with token
+    const favRes = await fetch(`/api/users/${userId}/favourites`, { headers });
     const favData = await favRes.json();
     if (Array.isArray(favData)) {
       favourites.value = favData;
-      console.log(favourites.value[0])
     }
   } catch (err) {
     console.error("Failed to load profiles or user info:", err);

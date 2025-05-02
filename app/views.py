@@ -7,6 +7,7 @@ from flask import send_from_directory, render_template
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from sqlalchemy import case, func, literal
 import jwt
 from functools import wraps
 
@@ -235,45 +236,50 @@ def is_favourited(current_user, profile_id):
 def get_profile_matches(current_user, profile_id):
     try:
         base = Profile.query.get_or_404(profile_id)
+
         match_score = (
-            case((Profile.fav_cuisine == base.fav_cuisine, 1), else_=0) +
-            case((Profile.fav_colour == base.fav_colour, 1), else_=0) +
-            case((Profile.fav_school_subject == base.fav_school_subject, 1), else_=0) +
-            case((Profile.political == base.political, 1), else_=0) +
-            case((Profile.religious == base.religious, 1), else_=0) +
-            case((Profile.family_oriented == base.family_oriented, 1), else_=0)
+            case((Profile.fav_cuisine == literal(base.fav_cuisine), 1), else_=0) +
+            case((Profile.fav_colour == literal(base.fav_colour), 1), else_=0) +
+            case((Profile.fav_school_subject == literal(base.fav_school_subject), 1), else_=0) +
+            case((Profile.political == literal(base.political), 1), else_=0) +
+            case((Profile.religious == literal(base.religious), 1), else_=0) +
+            case((Profile.family_oriented == literal(base.family_oriented), 1), else_=0)
         )
+
         matches = (
             db.session.query(Profile, match_score.label("match_count"))
-            .filter(  
+            .filter(
                 func.abs(Profile.birth_year - base.birth_year) <= 5,
                 func.abs(Profile.height - base.height).between(3, 10),
                 match_score >= 3
             )
             .all()
         )
+
         result = []
         for match, match_count in matches:
-           result.append({
-            "id": match.id,
-            "user_id": match.user_id_fk,
-            "birth_year": match.birth_year,
-            "sex": match.sex,
-            "height": match.height,
-            "fav_cuisine": match.fav_cuisine,
-            "fav_colour": match.fav_colour,
-            "parish": match.parish,
-            "fav_school_subject": match.fav_school_subject,
-            "political": match.political,
-            "religious": match.religious,
-            "family_oriented": match.family_oriented,
-            "fav_count": match.fav_count,
-            "match_count": match_count
-        })
+            result.append({
+                "id": match.id,
+                "user_id": match.user_id_fk,
+                "birth_year": match.birth_year,
+                "sex": match.sex,
+                "height": match.height,
+                "fav_cuisine": match.fav_cuisine,
+                "fav_colour": match.fav_colour,
+                "parish": match.parish,
+                "fav_school_subject": match.fav_school_subject,
+                "political": match.political,
+                "religious": match.religious,
+                "family_oriented": match.family_oriented,
+                "fav_count": match.fav_count,
+                "match_count": match_count
+            })
+
         return jsonify(result if result else {"message": "No matches found"}), 200
 
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+    
 
 @app.route('/api/search', methods=['GET'])#done
 def search_profiles():
