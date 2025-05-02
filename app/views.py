@@ -113,7 +113,7 @@ def profiles(current_user):
                 photo_url = (
                     url_for('get_image', filename=filename, _external=True)
                     if os.path.exists(photo_path)
-                    else url_for('get_image', filename='default-user.jpeg', _external=True)
+                    else url_for('get_image', filename='default-user.png', _external=True)
                 )
 
                 results.append({

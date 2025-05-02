@@ -1,37 +1,27 @@
-<template>
-  <header>
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-    <nav class="navbar">
-      <div class="container-fluid d-flex justify-content-between align-items-center w-100">
-        
-        <!-- Left: Jam Date logo -->
-        <a class="navbar-brand handwritten" href="/">Jam Date</a>
-
-        <!-- Right: Show Report + Logout if logged in -->
-        <div class="d-flex align-items-center gap-3">
-          <RouterLink v-if="isLoggedIn" to="/my-profile" class="nav-link">My Profile</RouterLink>
-          <RouterLink to="/report" class="nav-link report-link">View Report</RouterLink>
-          <button v-if="isLoggedIn" class="btn btn-link logout-btn" @click="logoutUser">Logout</button>
-        </div>
-      </div>
-    </nav>
-  </header>
-</template>
-
 <script setup>
 import { RouterLink, useRouter } from "vue-router";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 
 const isLoggedIn = ref(false);
 const router = useRouter();
 
-onMounted(() => {
+const checkLoginStatus = () => {
   isLoggedIn.value = sessionStorage.getItem("token") !== null;
+};
+
+onMounted(() => {
+  checkLoginStatus();
+  window.addEventListener("storage", checkLoginStatus);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("storage", checkLoginStatus);
 });
 
 const logoutUser = async () => {
   try {
     sessionStorage.removeItem("token");
+    sessionStorage.removeItem("userId");
     isLoggedIn.value = false;
     router.push("/login");
   } catch (error) {
