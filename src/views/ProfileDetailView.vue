@@ -71,35 +71,27 @@ const route = useRoute();
 let profile = ref(null);
 let loading = ref(true);
 let isFavourited = ref(false);
-let csrf_token = ref('');
-
-// Get CSRF token
-function getCsrfToken() {
-  fetch('/api/v1/csrf-token')
-    .then((response) => response.json())
-    .then((data) => {
-      csrf_token.value = data.csrf_token;
-    });
-}
-
-onMounted(() => {
-  getCsrfToken();
-});
 
 onMounted(async () => {
+  const token = sessionStorage.getItem("token");
+  if (!token) {
+    alert("Token is missing!");
+    return;
+  }
+
   try {
-    console.log(route.params.id);
     const response = await fetch(`/api/profiles/${route.params.id}`);
     profile.value = await response.json();
-    console.log(profile.value.fav_count)
-    console.log(profile.value);
 
     // Check if the profile is already favourited
-    const favResponse = await fetch(`/api/profiles/${profile.value.id}/is-favourited`);
+    const favResponse = await fetch(`/api/profiles/${profile.value.id}/is-favourited`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     const favData = await favResponse.json();
-    if (favData.isFavourited === true) {
-      isFavourited.value = true;
-    }
+    isFavourited.value = favData.isFavourited === true;
+
   } catch (error) {
     console.error(error);
   } finally {
@@ -109,17 +101,24 @@ onMounted(async () => {
 
 // Add to favourites
 async function addToFavourites() {
+  const token = sessionStorage.getItem("token");
+  if (!token) {
+    alert("Token is missing!");
+    return;
+  }
+
   try {
     const response = await fetch(`/api/profiles/${profile.value.id}/favourite`, {
       method: 'POST',
       headers: {
-        'X-CSRFToken': csrf_token.value,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       },
     });
     const data = await response.json();
     alert(data.message);
     if (data.message === "User added to favourites.") {
-      isFavourited.value = true; // Heart turns red
+      isFavourited.value = true;
       profile.value.fav_count += 1;
     }
   } catch (error) {
@@ -136,6 +135,7 @@ function emailUser() {
   }
 }
 </script>
+
 
 <style scoped>
 /* Ensure Font Awesome icons load properly */
