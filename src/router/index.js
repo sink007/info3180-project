@@ -7,10 +7,9 @@ import ReportView from '../views/ReportView.vue';
 import ProfilesView from '../views/ProfilesView.vue';
 import ProfileDetailView from '../views/ProfileDetailView.vue';
 import FavouritesView from '../views/FavouritesView.vue';
-import MatchesView from '../views/MatchesView.vue';
 import MyProfileView from '../views/MyProfileView.vue';
-import CreateProfileView from '../views/CreateProfileView.vue'; 
-import MatchesView from '../views/MatchesView.vue'; 
+import CreateProfileView from '../views/CreateProfileView.vue';
+import MatchView from '../views/MatchView.vue';
 
 const routes = [
   { path: '/', name: 'home', component: HomeView },
@@ -20,14 +19,10 @@ const routes = [
   { path: '/report', name: 'report', component: ReportView },
   { path: '/profiles', name: 'profiles', component: ProfilesView },
   { path: '/profiles/:id', name: 'profile-detail', component: ProfileDetailView },
-
   { path: '/favourites', name: 'favourites', component: FavouritesView },
-  { path: '/profiles/matches/:id', name: 'matches', component: MatchesView },
-
+  { path: '/profiles/matches/:id', name: 'matches', component: MatchView },
   { path: '/my-profile', name: 'my-profile', component: MyProfileView },
-  { path: '/profiles/new', name: 'new-profile', component: CreateProfileView }, 
-  
-  {path: '/profiles/matches/:id', name: 'MatchView', component: () => import('@/views/MatchView.vue')}
+  { path: '/profiles/new', name: 'new-profile', component: CreateProfileView }
 ];
 
 const router = createRouter({
