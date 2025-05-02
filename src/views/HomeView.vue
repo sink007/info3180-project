@@ -28,7 +28,7 @@ body, html {
 }
 
 .home-hero {
-  background: url('/site-background.jpg') center/cover no-repeat;
+  background: url('/assets/site-background.jpg') center/cover no-repeat;
   height: 100vh;
   margin: 0;
   padding: 0;
