@@ -15,11 +15,15 @@ async function logout() {
     const response = await fetch('/api/auth/logout', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${sessionStorage.getItem('token')}`
-      }
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      credentials: 'include'
     });
+
     if (response.ok) {
-      sessionStorage.removeItem('token');
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('loggedIn');
+      sessionStorage.removeItem('userId');
       alert('Logout successful!');
       router.push('/login');
     } else {
@@ -27,7 +31,6 @@ async function logout() {
     }
   } catch (error) {
     console.error(error);
-    console.log('Token:', sessionStorage.getItem('token'));
     alert('Logout failed.');
   }
 }
