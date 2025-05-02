@@ -1,5 +1,5 @@
 <template>
-  <div class="home-hero">
+  <div class="home-hero" :style="{ backgroundImage: `url(${backgroundImage})` }">
     <div class="overlay">
       <div class="glass-card">
         <h1 class="logo">Jam-Date</h1>
@@ -17,9 +17,12 @@
   </div>
 </template>
 
-<style>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
+<script setup>
+import backgroundImage from '@/assets/site-background.jpg'
+</script>
 
+<style scoped>
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
 
 body, html {
   margin: 0;
@@ -28,7 +31,9 @@ body, html {
 }
 
 .home-hero {
-  background: url('/assets/site-background.jpg') center/cover no-repeat;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
   height: 100vh;
   margin: 0;
   padding: 0;
