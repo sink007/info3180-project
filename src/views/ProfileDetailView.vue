@@ -137,13 +137,13 @@ function emailUser() {
 
 
 function getProfilePhoto(filename) {
-  if (!filename) return '/uploads/default-user.jpeg';
+  if (!filename) return '/uploads/default-user.png';
   return `/uploads/${filename}`;
 }
 
 
 function onImageError(e) {
-  e.target.src = '/uploads/default-user.jpeg';
+  e.target.src = '/uploads/default-user.png';
 }
 
 </script>

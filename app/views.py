@@ -109,7 +109,7 @@ def profiles(current_user):
                     continue
 
                 # Fallback image if user's image is missing or file not found
-                filename = user.photo if user.photo else 'default-user.jpeg'
+                filename = user.photo if user.photo else 'default-user.png'
                 photo_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
                 photo_url = (

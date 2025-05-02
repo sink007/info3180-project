@@ -9,17 +9,14 @@
     <div v-if="loading" class="text-center">Loading matches...</div>
 
     <div v-else-if="matches.length > 0" class="row justify-content-center">
-      <div
-        class="col-md-4 mb-4"
-        v-for="match in matches"
-        :key="match.id"
-      >
+      <div class="col-md-4 mb-4" v-for="match in matches" :key="match.id">
         <div class="card h-100 shadow-sm">
           <div class="card-body text-center">
             <h5 class="card-title">Potential Match</h5>
             <p class="mb-1"><strong>Birth Year:</strong> {{ match.birth_year }}</p>
             <p class="mb-1"><strong>Height:</strong> {{ match.height }} in</p>
             <p class="mb-1"><strong>Sex:</strong> {{ match.sex }}</p>
+            <p class="mb-1"><strong>Match Score:</strong> {{ match.match_count }}/6</p>
             <div class="d-flex justify-content-center gap-2 mt-2">
               <RouterLink :to="`/profiles/${match.id}`" class="btn btn-outline-primary">
                 Show More Details
@@ -44,30 +41,21 @@ import { useRoute } from 'vue-router';
 const route = useRoute();
 const matches = ref([]);
 const loading = ref(true);
-const csrf_token = ref('');
-
-function getCsrfToken() {
-  fetch('/api/v1/csrf-token')
-    .then((response) => response.json())
-    .then((data) => {
-      csrf_token.value = data.csrf_token;
-    });
-}
 
 async function loadMatches() {
   const profileId = route.params.id;
+  const token = sessionStorage.getItem("token");
 
   try {
     const response = await fetch(`/api/profiles/matches/${profileId}`, {
       method: 'GET',
       headers: {
-        'X-CSRFToken': csrf_token.value
-      },
-      credentials: 'include'
+        'Authorization': `Bearer ${token}`
+      }
     });
 
     const data = await response.json();
-    if (data) {
+    if (Array.isArray(data)) {
       matches.value = data;
     } else {
       console.warn("No matches:", data.message);
@@ -80,7 +68,6 @@ async function loadMatches() {
 }
 
 onMounted(() => {
-  getCsrfToken();
   loadMatches();
 });
 </script>
