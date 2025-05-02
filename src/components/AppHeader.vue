@@ -19,12 +19,12 @@
 </template>
 
 <script setup>
-
-import { RouterLink, useRouter } from "vue-router";
-import { ref, onMounted, onUnmounted } from "vue";
+import { RouterLink, useRouter, useRoute } from "vue-router";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 
 const loggedIn = ref(false);
 const router = useRouter();
+const route = useRoute();
 
 function checkAuth() {
   loggedIn.value = sessionStorage.getItem("token") !== null;
@@ -33,6 +33,11 @@ function checkAuth() {
 onMounted(() => {
   checkAuth();
   window.addEventListener("storage", checkAuth);
+});
+
+// Check auth whenever the route changes
+watch(route, () => {
+  checkAuth();
 });
 
 onUnmounted(() => {
