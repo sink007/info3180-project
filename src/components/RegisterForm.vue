@@ -76,6 +76,7 @@
             headers: {
                 'X-CSRFToken': csrf_token.value,
             },
+            credentials: 'include' // <-- This is crucial
         });
 
         const text = await response.text();  // Don't try to parse as JSON yet
