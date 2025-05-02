@@ -10,6 +10,7 @@ import FavouritesView from '../views/FavouritesView.vue';
 import MatchesView from '../views/MatchesView.vue';
 import MyProfileView from '../views/MyProfileView.vue';
 import CreateProfileView from '../views/CreateProfileView.vue'; 
+import MatchesView from '../views/MatchesView.vue'; 
 
 const routes = [
   { path: '/', name: 'home', component: HomeView },
