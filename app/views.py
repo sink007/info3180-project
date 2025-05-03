@@ -37,10 +37,10 @@ def serve_assets(filename):
 
 @app.route('/api/register', methods=['POST'])
 def register():
-    username = request.form.get('username')
-    password = request.form.get('password')
-    name = request.form.get('name')
-    email = request.form.get('email')
+    username = request.form.get('username', '').strip()
+    password = request.form.get('password', '').strip()
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip()
     photo = request.files.get('photo')
 
     print("== Incoming registration ==")
@@ -53,12 +53,11 @@ def register():
     filename = secure_filename(photo.filename)
     photo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
-    # 🔥 Force proper hashing
-    hashed_password = generate_password_hash(password.strip())
+    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
     print("Hashed password:", hashed_password)
 
     new_user = Users(
-        username=username.strip(),
+        username=username,
         password=hashed_password,
         name=name,
         email=email,
