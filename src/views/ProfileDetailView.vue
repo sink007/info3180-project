@@ -75,31 +75,40 @@ let isFavourited = ref(false);
 onMounted(async () => {
   const token = sessionStorage.getItem("token");
   if (!token) {
-    alert("Token is missing!");
+    alert("You need to log in to view this profile.");
     return;
   }
 
   try {
-    const response = await fetch(`/api/profiles/${route.params.id}`);
+    const response = await fetch(`/api/profiles/${route.params.id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Profile fetch failed.");
+    }
+
     profile.value = await response.json();
 
-    // Check if the profile is already favourited
     const favResponse = await fetch(`/api/profiles/${profile.value.id}/is-favourited`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
+
     const favData = await favResponse.json();
     isFavourited.value = favData.isFavourited === true;
 
   } catch (error) {
-    console.error(error);
+    console.error("Error loading profile:", error);
+    alert("Failed to load profile. Try logging in again.");
   } finally {
     loading.value = false;
   }
 });
 
-// Add to favourites
 async function addToFavourites() {
   const token = sessionStorage.getItem("token");
   if (!token) {
@@ -126,7 +135,6 @@ async function addToFavourites() {
   }
 }
 
-// Email user
 function emailUser() {
   if (profile.value && profile.value.email) {
     window.location.href = `mailto:${profile.value.email}`;
@@ -150,6 +158,5 @@ function onImageError(e) {
 
 
 <style scoped>
-/* Ensure Font Awesome icons load properly */
 @import url(https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css);
 </style>

@@ -50,7 +50,10 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import AuthOverlay from '@/components/AuthOverlay.vue';
+
+const router = useRouter();
 const showOverlay = ref(false);
 
 const topN = ref("");
@@ -87,9 +90,9 @@ function handleProfileClick(profileId) {
     showOverlay.value = true;
     return;
   }
-  // If token exists, navigate
-  window.location.href = `/profiles/${profileId}`;
+  router.push(`/profiles/${profileId}`);
 }
+
 </script>
 
 <style scoped>

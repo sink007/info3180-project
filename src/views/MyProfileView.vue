@@ -34,7 +34,7 @@
         <div v-for="profile in favourites" :key="'fav-' + profile.id" class="col-md-4 mb-4">
           <div class="card h-100 shadow-sm fav-card text-center">
             <div class="card-body">
-              <img :src="`/uploads/${profile.photo}`" alt="Profile" class="profile-pic mb-3" />
+              <img :src="`/uploads/${profile.photo}`" alt="Profile" class="fav-profile-pic mb-3" />
               <h5 class="fw-bold">{{ profile.name }}</h5>
               <RouterLink :to="`/profiles/${profile.id}`" class="btn btn-outline-danger">View Profile</RouterLink>
             </div>
@@ -76,8 +76,14 @@ onMounted(async () => {
       ? data.filter(p => p.user_id === parseInt(userId))
       : [];
 
-    const favRes = await fetch(`/api/users/${userId}/favourites`);
+      const favRes = await fetch(`/api/users/${userId}/favourites`, {
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`
+        }
+      });
+
     const favData = await favRes.json();
+
     favourites.value = Array.isArray(favData) ? favData : [];
   } catch (err) {
     console.error("Failed to load profiles or user info:", err);

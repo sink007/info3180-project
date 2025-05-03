@@ -46,8 +46,6 @@ const loginUser = async () => {
       sessionStorage.setItem("token", data.token);
       sessionStorage.setItem("userId", data.id);
 
-      console.log("Token at login:", sessionStorage.getItem("token"));
-
       setTimeout(() => {
         router.push('/profiles');
       }, 500);
