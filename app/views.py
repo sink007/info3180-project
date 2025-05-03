@@ -50,6 +50,11 @@ def register():
     if not all([username, password, name, email, photo]):
         return jsonify({"message": "Missing required fields"}), 400
 
+    # 🚫 Block duplicate username
+    existing_user = Users.query.filter_by(username=username).first()
+    if existing_user:
+        return jsonify({"message": "Username already exists"}), 409
+
     filename = secure_filename(photo.filename)
     photo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
@@ -74,7 +79,6 @@ def register():
         "name": new_user.name,
         "email": new_user.email
     }), 201
-
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
