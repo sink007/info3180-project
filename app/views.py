@@ -57,7 +57,8 @@ def register():
     filename = secure_filename(photo.filename)
     photo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
-    hashed_password = generate_password_hash(password)
+    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+    
     print("Hashed password:", hashed_password)
 
     new_user = Users(
