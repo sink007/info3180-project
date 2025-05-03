@@ -47,13 +47,20 @@ const handleFileUpload = (event) => {
 };
 
 const registerUser = async () => {
-    let registerForm = document.getElementById('registerForm');
-    let form_data = new FormData(registerForm);
+    let form_data = new FormData();
     form_data.append('username', username.value);
     form_data.append('password', password.value);
     form_data.append('name', name.value);
     form_data.append('email', email.value);
+    if (photo.value) {
     form_data.append('photo', photo.value);
+    }
+
+    console.log("Username:", username.value);
+    console.log("Password:", password.value);
+    console.log("Name:", name.value);
+    console.log("Email:", email.value);
+    console.log("Photo:", photo.value);
 
     try {
         let response = await fetch('/api/register', {
