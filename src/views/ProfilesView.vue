@@ -29,7 +29,7 @@
       <div v-if="profiles.length" class="row">
         <div v-for="profile in filteredProfiles" :key="profile.id" class="col-md-4 mb-4">
           <div class="profile-card">
-            <img :src="profile.photo" alt="Profile Image" class="bg-img" />
+            <img :src="`/uploads/${profile.photo}`" alt="Profile Image" class="bg-img" />>
 
             <div class="overlay">
               <div class="text-block">
