@@ -450,11 +450,10 @@ def get_image(filename):
         safe_name = secure_filename(filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_name)
 
-        # Log the file path to verify what path Flask is trying
         print("Trying to serve image from:", file_path)
-
-        print("FILES IN UPLOADS DIR:", os.listdir(app.config["UPLOAD_FOLDER"]))
-        print("Trying to serve image:", safe_name)
+        print("UPLOAD_FOLDER config:", app.config["UPLOAD_FOLDER"])
+        print("Directory exists?", os.path.isdir(app.config["UPLOAD_FOLDER"]))
+        print("Files in directory:", os.listdir(app.config["UPLOAD_FOLDER"]) if os.path.isdir(app.config["UPLOAD_FOLDER"]) else "Missing")
 
         if not os.path.exists(file_path):
             print(f"Image not found: {safe_name}")
