@@ -453,6 +453,9 @@ def get_image(filename):
         # Log the file path to verify what path Flask is trying
         print("Trying to serve image from:", file_path)
 
+        print("FILES IN UPLOADS DIR:", os.listdir(app.config["UPLOAD_FOLDER"]))
+        print("Trying to serve image:", safe_name)
+
         if not os.path.exists(file_path):
             print(f"Image not found: {safe_name}")
             return jsonify({"error": "File not found"}), 404
