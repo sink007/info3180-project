@@ -358,29 +358,50 @@ def get_user(user_id):
     return jsonify({"message": "User doesnt exist"})
 
 @app.route('/api/users/<int:user_id>/favourites', methods=['GET'])
-def get_user_favourites(user_id):
+@token_required
+def get_user_favourites(current_user, user_id):
+    if current_user.id != user_id:
+        return jsonify({"message": "Unauthorized"}), 403
+
     user = Users.query.get_or_404(user_id)
     favs = Favourite.query.filter_by(user_id_fk=user.id).all()
-    fav_profiles = [Profile.query.get(fav.fav_user_id_fk) for fav in favs]
-    if fav_profiles:
-        return jsonify([{
-            "id": x.id,
-            "user_id": x.user_id_fk,
-            "birth_year": x.birth_year,
-            "sex": x.sex,
-            "height": x.height,
-            "race": x.race,
-            "description": x.description,
-            "fav_cuisine": x.fav_cuisine,
-            "fav_colour": x.fav_colour,
-            "parish": x.parish,
-            "fav_school_subject": x.fav_school_subject,
-            "political": x.political,
-            "religious": x.religious,
-            "family_oriented": x.family_oriented,
-            "fav_count": x.fav_count
-        } for x in fav_profiles])
-    return jsonify({"message": "User has no favourite users"})
+    results = []
+
+    for fav in favs:
+        profile = Profile.query.get(fav.fav_user_id_fk)
+        if not profile:
+            continue
+
+        fav_user = Users.query.get(profile.user_id_fk)
+        if not fav_user:
+            continue
+
+        filename = fav_user.photo or 'default-user.png'
+        photo_url = url_for('get_image', filename=filename, _external=True)
+
+        results.append({
+            "id": profile.id,
+            "user_id": profile.user_id_fk,
+            "name": fav_user.name,
+            "photo": photo_url,
+            "description": profile.description,
+            "parish": profile.parish,
+            "race": profile.race,
+            "birth_year": profile.birth_year,
+            "sex": profile.sex,
+            "height": profile.height,
+            "fav_cuisine": profile.fav_cuisine,
+            "fav_colour": profile.fav_colour,
+            "fav_school_subject": profile.fav_school_subject,
+            "political": profile.political,
+            "religious": profile.religious,
+            "family_oriented": profile.family_oriented,
+            "fav_count": profile.fav_count
+        })
+
+    if results:
+        return jsonify(results), 200
+    return jsonify({"message": "User has no favourite users"}), 404
 
 
 @app.route('/api/users/favourites/<int:N>', methods=['GET'])
