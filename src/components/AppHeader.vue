@@ -4,10 +4,8 @@
     <nav class="navbar">
       <div class="container-fluid d-flex justify-content-between align-items-center w-100">
 
-        <!-- Left: Jam Date logo -->
         <RouterLink class="navbar-brand handwritten" to="/">Jam Date</RouterLink>
 
-        <!-- Right: Show Report + Logout if logged in -->
         <div class="d-flex align-items-center gap-3">
           <RouterLink v-if="loggedIn" to="/my-profile" class="nav-link">My Profile</RouterLink>
           <RouterLink to="/report" class="nav-link report-link">View Report</RouterLink>
@@ -35,7 +33,6 @@ onMounted(() => {
   window.addEventListener("storage", checkAuth);
 });
 
-// Check auth whenever the route changes
 watch(route, () => {
   checkAuth();
 });
