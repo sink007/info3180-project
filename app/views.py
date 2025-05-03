@@ -171,29 +171,36 @@ def profiles(current_user):
             if profile_count >= 3:
                 return jsonify({"message": "Profile limit reached"}), 403
 
-            form = ProfileForm()
-            if form.validate_on_submit():
-                new_profile = Profile(
-                    user_id_fk=current_user.id,
-                    description=form.description.data,
-                    parish=form.parish.data,
-                    biography=form.biography.data,
-                    sex=form.sex.data,
-                    race=form.race.data,
-                    birth_year=form.birth_year.data,
-                    height=form.height.data,
-                    fav_cuisine=form.fav_cuisine.data,
-                    fav_colour=form.fav_colour.data,
-                    fav_school_subject=form.fav_school_subject.data,
-                    political=form.political.data,
-                    religious=form.religious.data,
-                    family_oriented=form.family_oriented.data,
-                )
-                db.session.add(new_profile)
-                db.session.commit()
-                return jsonify({"message": "Profile added successfully"}), 201
+            data = request.get_json()
+            required_fields = [
+                'description', 'parish', 'biography', 'sex', 'race',
+                'birth_year', 'height', 'fav_cuisine',
+                'fav_colour', 'fav_school_subject'
+            ]
 
-            return jsonify({"message": "Invalid form input"}), 400
+            if not all(field in data for field in required_fields):
+                return jsonify({"message": "Missing required fields"}), 400
+
+            new_profile = Profile(
+                user_id_fk=current_user.id,
+                description=data['description'],
+                parish=data['parish'],
+                biography=data['biography'],
+                sex=data['sex'],
+                race=data['race'],
+                birth_year=int(data['birth_year']),
+                height=float(data['height']),
+                fav_cuisine=data['fav_cuisine'],
+                fav_colour=data['fav_colour'],
+                fav_school_subject=data['fav_school_subject'],
+                political=data.get('political', False),
+                religious=data.get('religious', False),
+                family_oriented=data.get('family_oriented', False),
+            )
+
+            db.session.add(new_profile)
+            db.session.commit()
+            return jsonify({"message": "Profile added successfully"}), 201
 
         except Exception as e:
             print("POST /api/profiles error:", e)
