@@ -123,7 +123,7 @@ for user_id in range(1, 31):
             f"{random.choice([True, False])}, "
             f"{random.choice([True, False])}, "
             f"{random.choice([True, False])}, "
-            f"30)"
+            f"{random.randint(1, 30)})"
         )
         profile_id += 1
 

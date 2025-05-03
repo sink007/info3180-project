@@ -74,46 +74,44 @@
   const router = useRouter();
   
   async function submitProfile() {
-  try {
-    const csrfToken = await fetch('https://info3180-project-lof1.onrender.com/api/v1/csrf-token')
-      .then(response => response.json())
-      .then(data => data.csrf_token);
+    try {
+      const token = sessionStorage.getItem('token');
 
-    const response = await fetch('https://info3180-project-lof1.onrender.com/api/profiles', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken
-      },
-      body: JSON.stringify({
-        description: description.value,
-        parish: parish.value,
-        biography: biography.value,
-        sex: sex.value,
-        race: race.value,
-        birth_year: birth_year.value,
-        height: height.value,
-        fav_cuisine: fav_cuisine.value,
-        fav_colour: fav_colour.value,
-        fav_school_subject: fav_school_subject.value,
-        political: political.value,
-        religious: religious.value,
-        family_oriented: family_oriented.value
-      })
-    });
+      const response = await fetch('https://info3180-project-lof1.onrender.com/api/profiles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          description: description.value,
+          parish: parish.value,
+          biography: biography.value,
+          sex: sex.value,
+          race: race.value,
+          birth_year: birth_year.value,
+          height: height.value,
+          fav_cuisine: fav_cuisine.value,
+          fav_colour: fav_colour.value,
+          fav_school_subject: fav_school_subject.value,
+          political: political.value,
+          religious: religious.value,
+          family_oriented: family_oriented.value
+        })
+      });
 
-    const data = await response.json();
-    if (response.ok) {
-      alert(data.message);
-      router.push('/profiles'); 
-    } else {
-      console.error('Error creating profile:', data);
-      alert('Failed to create profile.');
+      const data = await response.json();
+      if (response.ok) {
+        alert(data.message);
+        router.push('/profiles');
+      } else {
+        console.error('Error creating profile:', data);
+        alert('Failed to create profile.');
+      }
+    } catch (error) {
+      console.error('Error creating profile:', error);
     }
-  } catch (error) {
-    console.error('Error creating profile:', error);
   }
-}
   </script>
   
   <style scoped>
