@@ -77,7 +77,18 @@ def login():
     username = data.get('username')
     password = data.get('password')
 
+
+    print(f"Incoming username: {username}")
+    print(f"Incoming raw password: {password}")
+
     user = Users.query.filter_by(username=username).first()
+
+    print(f"Found user in DB: {user}")
+    if user:
+        print(f"Stored hashed password: {user.password}")
+        print(f"Password check result: {check_password_hash(user.password, password)}")
+
+
     if user and check_password_hash(user.password, password):
         token = jwt.encode({'id': user.id}, app.config['JWT_SECRET_KEY'], algorithm="HS256")
         return jsonify({

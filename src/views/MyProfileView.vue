@@ -6,7 +6,14 @@
       <h2>{{ username }}'s Profiles</h2>
     </div>
 
-    <!-- Profile Cards -->
+    <template>
+  <div class="container mt-5">
+    
+    <div class="text-center mb-5">
+      <img :src="userPhoto" class="profile-pic mb-3" alt="Profile Picture" />
+      <h2>{{ username }}'s Profiles</h2>
+    </div>
+
     <div class="row justify-content-center">
       <div v-for="profile in profiles" :key="profile.id" class="col-md-4 mb-4">
         <div class="card h-100 shadow-sm">
@@ -22,13 +29,30 @@
         </div>
       </div>
 
-      <!-- Create Profile Card (only if less than 3 profiles) -->
       <div v-for="n in Math.max(0, 3 - profiles.length)" :key="'create-' + n" class="col-md-4 mb-4">
         <div class="card h-100 d-flex align-items-center justify-content-center text-center">
           <button @click="router.push('/profiles/new')" class="square-add-btn">+</button>
         </div>
       </div>
     </div>
+
+    <div class="mt-5" v-if="favourites.length">
+      <h3 class="text-center mb-4 text-danger">Profiles You Have Favourited</h3>
+      <div class="row justify-content-center">
+        <div v-for="profile in favourites" :key="'fav-' + profile.id" class="col-md-4 mb-4">
+          <div class="card h-100 shadow-sm fav-card">
+            <div class="card-body text-center">
+              <h5 class="card-title">{{ profile.description }}</h5>
+              <p><strong>Parish:</strong> {{ profile.parish }}</p>
+              <p><strong>Race:</strong> {{ profile.race }}</p>
+              <RouterLink :to="`/profiles/${profile.id}`" class="btn btn-outline-danger">Show More Details</RouterLink>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+</template>
 
     <div class="mt-5" v-if="favourites.length">
       <h3 class="text-center mb-4 text-danger">Profiles You Have Favourited</h3>
