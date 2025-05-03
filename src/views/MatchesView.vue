@@ -12,16 +12,15 @@
       <div class="col-md-4 mb-4" v-for="match in matches" :key="match.id">
         <div class="card h-100 shadow-sm">
           <div class="card-body text-center">
+            <div class="badge-match mb-2">💘 Matched</div>
             <h5 class="card-title">Potential Match</h5>
-            <p class="mb-1"><strong>Birth Year:</strong> {{ match.birth_year }}</p>
-            <p class="mb-1"><strong>Height:</strong> {{ match.height }} in</p>
-            <p class="mb-1"><strong>Sex:</strong> {{ match.sex }}</p>
-            <p class="mb-1"><strong>Match Score:</strong> {{ match.match_count }}/6</p>
-            <div class="d-flex justify-content-center gap-2 mt-2">
-              <RouterLink :to="`/profiles/${match.id}`" class="btn btn-outline-primary">
-                Show More Details
-              </RouterLink>
-            </div>
+            <p><strong>Birth Year:</strong> {{ match.birth_year }}</p>
+            <p><strong>Height:</strong> {{ match.height }} in</p>
+            <p><strong>Sex:</strong> {{ match.sex }}</p>
+            <p><strong>Match Score:</strong> {{ match.match_count }}/6</p>
+            <RouterLink :to="`/profiles/${match.id}`" class="btn btn-outline-primary mt-2">
+              Show More Details
+            </RouterLink>
           </div>
         </div>
       </div>
@@ -91,5 +90,46 @@ onMounted(() => {
   background-color: #007bff;
   color: white;
   transform: scale(1.05);
+}
+
+.card {
+  border: 2px solid #ffccd5;
+  border-radius: 12px;
+  background-color: #fff5f7;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 20px rgba(255, 192, 203, 0.4);
+}
+
+.card-title {
+  font-weight: bold;
+  color: #d6336c;
+  font-size: 1.2rem;
+}
+
+.card-body p {
+  margin: 0.3rem 0;
+}
+
+.btn-outline-primary {
+  border-color: #d6336c;
+  color: #d6336c;
+}
+
+.btn-outline-primary:hover {
+  background-color: #d6336c;
+  color: white;
+}
+
+.badge-match {
+  background-color: #ffccd5;
+  color: #b02a37;
+  font-weight: 600;
+  border-radius: 50px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
 }
 </style>
