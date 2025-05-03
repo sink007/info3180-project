@@ -43,16 +43,22 @@ def register():
     email = request.form.get('email')
     photo = request.files.get('photo')
 
+    print("== Incoming registration ==")
+    print("Username:", username)
+    print("Raw password:", password)
+
     if not all([username, password, name, email, photo]):
         return jsonify({"message": "Missing required fields"}), 400
 
     filename = secure_filename(photo.filename)
     photo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
-    hashed_password = generate_password_hash(password)
+    # 🔥 Force proper hashing
+    hashed_password = generate_password_hash(password.strip())
+    print("Hashed password:", hashed_password)
 
     new_user = Users(
-        username=username,
+        username=username.strip(),
         password=hashed_password,
         name=name,
         email=email,
