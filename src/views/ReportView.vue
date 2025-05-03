@@ -26,7 +26,8 @@
           <div class="card-body text-center">
             <div :class="['rank-label', getRankClass(index)]" class="mb-3">#{{ index + 1 }}</div>
             <img 
-              :src="`/uploads/${profile.photo}`" 
+              :src="`/uploads/${profile.photo || 'default-user.png'}`" 
+              @error="handleImageError($event)"
               alt="Profile Photo" 
               class="profile-pic mb-3" 
             />
@@ -91,6 +92,10 @@ function handleProfileClick(profileId) {
     return;
   }
   router.push(`/profiles/${profileId}`);
+}
+
+function handleImageError(event) {
+  event.target.src = '/uploads/default-user.png';
 }
 
 </script>
