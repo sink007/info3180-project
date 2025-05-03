@@ -14,7 +14,7 @@ class Users(db.Model):
 
     def __init__(self, username, password, name, email, photo, date_joined):
         self.username = username
-        self.password = password
+        self.password = generate_password_hash(password, method='pbkdf2:sha256')
         self.name = name
         self.email = email
         self.photo = photo

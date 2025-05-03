@@ -35,6 +35,8 @@ def index():
 def serve_assets(filename):
     return app.send_static_file(os.path.join('assets', filename))
 
+
+
 @app.route('/api/register', methods=['POST'])
 def register():
     username = request.form.get('username').strip()
@@ -57,13 +59,9 @@ def register():
     filename = secure_filename(photo.filename)
     photo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
-    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-    
-    print("Hashed password:", hashed_password)
-
     new_user = Users(
         username=username,
-        password=hashed_password,
+        password=password,  # Store raw password
         name=name,
         email=email,
         photo=filename,
@@ -79,6 +77,8 @@ def register():
         "name": new_user.name,
         "email": new_user.email
     }), 201
+
+
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
