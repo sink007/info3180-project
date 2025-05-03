@@ -31,14 +31,15 @@
       <h3 class="text-center mb-4 text-danger">Profiles You Have Favourited</h3>
       <div class="row justify-content-center">
         <div v-for="profile in favourites" :key="'fav-' + profile.id" class="col-md-4 mb-4">
-          <div class="card h-100 shadow-sm fav-card">
-            <div class="card-body text-center">
-              <h5 class="card-title">{{ profile.description }}</h5>
-              <p><strong>Parish:</strong> {{ profile.parish }}</p>
-              <p><strong>Race:</strong> {{ profile.race }}</p>
-              <RouterLink :to="`/profiles/${profile.id}`" class="btn btn-outline-danger">Show More Details</RouterLink>
-            </div>
-          </div>
+          <div class="card fav-card h-100 text-center p-3">
+          <img 
+            :src="`/uploads/${profile.photo}`" 
+            alt="Profile Photo" 
+            class="fav-profile-pic mx-auto mb-3"
+          />
+          <h5 class="fw-bold">{{ profile.name }}</h5>
+          <RouterLink :to="`/profiles/${profile.id}`" class="btn btn-outline-danger mt-2">View Profile</RouterLink>
+        </div>
         </div>
       </div>
     </div>
@@ -135,5 +136,14 @@ onMounted(async () => {
 .fav-card .btn:hover {
   background-color: #dc3545;
   color: white;
+}
+
+.fav-profile-pic {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #dc3545;
+  box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
 }
 </style>

@@ -34,7 +34,7 @@
             <p class="mb-1"><strong>Parish:</strong> {{ profile.parish }}</p>
             <p class="mb-2"><strong>Favourited:</strong> {{ profile.fav_count }} time(s)</p>
             <div class="text-center">
-              <router-link :to="`/profiles/${profile.id}`" class="btn btn-outline-primary">Show More Details</router-link>
+              <button class="btn btn-outline-primary" @click="handleProfileClick(profile.id)">Show More Details</button>
             </div>
           </div>
         </div>
@@ -45,10 +45,13 @@
       <p class="text-center">No top profiles found.</p>
     </div>
   </div>
+  <AuthOverlay :show="showOverlay" />
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import AuthOverlay from '@/components/AuthOverlay.vue';
+const showOverlay = ref(false);
 
 const topN = ref("");
 const loading = ref(false);
@@ -76,6 +79,16 @@ function getRankClass(index) {
   if (index === 1) return 'silver';
   if (index === 2) return 'bronze';
   return 'gray';
+}
+
+function handleProfileClick(profileId) {
+  const token = sessionStorage.getItem('token');
+  if (!token) {
+    showOverlay.value = true;
+    return;
+  }
+  // If token exists, navigate
+  window.location.href = `/profiles/${profileId}`;
 }
 </script>
 
