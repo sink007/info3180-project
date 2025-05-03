@@ -29,19 +29,19 @@
 
     <div class="mt-5" v-if="favourites.length">
       <h3 class="text-center mb-4 text-danger">Profiles You Have Favourited</h3>
+
       <div class="row justify-content-center">
         <div v-for="profile in favourites" :key="'fav-' + profile.id" class="col-md-4 mb-4">
-          <div class="card fav-card h-100 text-center p-3">
-          <img 
-            :src="`/uploads/${profile.photo}`" 
-            alt="Profile Photo" 
-            class="fav-profile-pic mx-auto mb-3"
-          />
-          <h5 class="fw-bold">{{ profile.name }}</h5>
-          <RouterLink :to="`/profiles/${profile.id}`" class="btn btn-outline-danger mt-2">View Profile</RouterLink>
-        </div>
+          <div class="card h-100 shadow-sm fav-card text-center">
+            <div class="card-body">
+              <img :src="`/uploads/${profile.photo}`" alt="Profile" class="profile-pic mb-3" />
+              <h5 class="fw-bold">{{ profile.name }}</h5>
+              <RouterLink :to="`/profiles/${profile.id}`" class="btn btn-outline-danger">View Profile</RouterLink>
+            </div>
+          </div>
         </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -113,9 +113,9 @@ onMounted(async () => {
 }
 
 .fav-card {
-  border: 2px dashed #dc3545;
+  border: 2px solid #dc3545;
   background-color: #fff0f3;
-  border-radius: 10px;
+  border-radius: 12px;
   transition: transform 0.2s ease-in-out;
 }
 
