@@ -37,10 +37,10 @@ def serve_assets(filename):
 
 @app.route('/api/register', methods=['POST'])
 def register():
-    username = request.form.get('username', '').strip()
-    password = request.form.get('password', '').strip()
-    name = request.form.get('name', '').strip()
-    email = request.form.get('email', '').strip()
+    username = request.form.get('username').strip()
+    password = request.form.get('password').strip()
+    name = request.form.get('name').strip()
+    email = request.form.get('email').strip()
     photo = request.files.get('photo')
 
     print("== Incoming registration ==")
@@ -50,7 +50,6 @@ def register():
     if not all([username, password, name, email, photo]):
         return jsonify({"message": "Missing required fields"}), 400
 
-    # 🚫 Block duplicate username
     existing_user = Users.query.filter_by(username=username).first()
     if existing_user:
         return jsonify({"message": "Username already exists"}), 409
@@ -58,7 +57,7 @@ def register():
     filename = secure_filename(photo.filename)
     photo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
-    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+    hashed_password = generate_password_hash(password)
     print("Hashed password:", hashed_password)
 
     new_user = Users(
